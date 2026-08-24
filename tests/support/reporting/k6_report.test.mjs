@@ -59,6 +59,17 @@ test("top percentile metrics stay paired within responsive rows", () => {
   assert.match(report, /\.metric-pair \{ display: grid; grid-template-columns: repeat\(2, minmax\(0, 1fr\)\); flex: 2 1 454px;/)
 })
 
+test("percentile labels use readable names instead of p90 and p95", () => {
+  const report = renderK6Report(summary)
+  const output = renderK6TextSummary(summary)
+
+  assert.equal(report.match(/90th percentile latency/g)?.length, 3)
+  assert.equal(report.match(/95th percentile latency/g)?.length, 3)
+  assert.doesNotMatch(report, />p(?:90|95)</)
+  assert.match(output, /HTTP 95th percentile latency: 1\.1\u00a0ms/)
+  assert.doesNotMatch(output, /HTTP p95 latency/)
+})
+
 test("HTML report has branded browser metadata", () => {
   const report = renderK6Report(summary)
 

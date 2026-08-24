@@ -139,13 +139,13 @@ function horizontalBarChart({ id, title, description, items, formatter, wide = f
   const bars = items
     .map((item, index) => {
       const value = values[index]
-      const barWidth = maximum > 0 && value > 0 ? Math.max(3, (value / maximum) * 420) : 0
+      const barWidth = maximum > 0 && value > 0 ? Math.max(3, (value / maximum) * 370) : 0
       const y = 12 + index * rowHeight
 
       return `
             <text class="bar-label" x="0" y="${y + 17}">${escapeHtml(item.label)}</text>
-            <rect class="bar-track" x="130" y="${y}" width="420" height="22" rx="6"></rect>
-            <rect class="bar-value ${item.highlight ? "highlight" : ""}" x="130" y="${y}" width="${barWidth}" height="22" rx="6"></rect>
+            <rect class="bar-track" x="180" y="${y}" width="370" height="22" rx="6"></rect>
+            <rect class="bar-value ${item.highlight ? "highlight" : ""}" x="180" y="${y}" width="${barWidth}" height="22" rx="6"></rect>
             <text class="bar-number" x="750" y="${y + 17}" text-anchor="end">${escapeHtml(formatter(value))}</text>`
     })
     .join("")
@@ -202,8 +202,8 @@ export function renderK6Report(summary) {
       { label: "Minimum", value: duration.min },
       { label: "Median", value: duration.med },
       { label: "Average", value: duration.avg },
-      { label: "p90", value: duration["p(90)"] },
-      { label: "p95", value: duration["p(95)"], highlight: true },
+      { label: "90th percentile latency", value: duration["p(90)"] },
+      { label: "95th percentile latency", value: duration["p(95)"], highlight: true },
       { label: "Maximum", value: duration.max }
     ]
   })
@@ -343,8 +343,8 @@ export function renderK6Report(summary) {
           ${latencyRow("Median", duration.med)}
           ${latencyRow("Minimum", duration.min)}
           ${latencyRow("Maximum", duration.max)}
-          ${latencyRow("p90", duration["p(90)"])}
-          ${latencyRow("p95", duration["p(95)"])}
+          ${latencyRow("90th percentile latency", duration["p(90)"])}
+          ${latencyRow("95th percentile latency", duration["p(95)"])}
         </tbody></table>
       </section>
 
@@ -391,7 +391,7 @@ export function renderK6TextSummary(summary) {
     `  checks passed: ${formatPercentage(checks.rate)}`,
     `  HTTP failures: ${formatPercentage(failures.rate)}`,
     `  HTTP request rate: ${formatRate(requests.rate)}`,
-    `  HTTP p95 latency: ${formatDurationMs(duration["p(95)"])}`,
+    `  HTTP 95th percentile latency: ${formatDurationMs(duration["p(95)"])}`,
     "  thresholds:",
     ...(thresholdLines.length ? thresholdLines : ["  none"]),
     ""
