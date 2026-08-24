@@ -20,7 +20,7 @@ define run_ui
 	else \
 		printf '%s\n' \
 			"UI test runtime is unavailable." \
-			"Install Node.js 22+ (npm/npx) or start Docker, then retry."; \
+			"Install Node.js 24.x (npm/npx) or start Docker, then retry."; \
 		exit 127; \
 	fi
 endef
@@ -36,7 +36,7 @@ install:
 	else \
 		printf '%s\n' \
 			"UI test runtime is unavailable." \
-			"Install Node.js 22+ (npm/npx) or start Docker, then retry."; \
+			"Install Node.js 24.x (npm/npx) or start Docker, then retry."; \
 		exit 127; \
 	fi
 
@@ -84,7 +84,8 @@ performance-k6-preflight:
 	fi
 
 _performance-k6-run:
-	K6_IMAGE=$(K6_IMAGE) docker compose $(K6_ENV_OPTION) \
+	mkdir -p reports/k6
+	K6_IMAGE=$(K6_IMAGE) $(COMPOSE) $(K6_ENV_OPTION) \
 		--profile performance run --rm performance-tests
 
 live:

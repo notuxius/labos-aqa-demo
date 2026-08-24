@@ -163,6 +163,8 @@ make performance-k6
 
 The Make target passes `.env` to a profile-gated Compose service; exported shell values take precedence. Use another file with `K6_ENV_FILE=.env.staging make performance-k6`. Optional load controls can be supplied as `VUS=10 DURATION=60s ITERATION_PAUSE_SECONDS=0.2 make performance-k6`. The default 0.1-second iteration pause prevents this smoke profile from becoming an accidental maximum-throughput test; set it to `0` only when that behavior is intentional. The profile enforces an error rate below 1% and p95 latency below 500 ms; real thresholds must come from product SLOs and production-like capacity.
 
+Each k6 run writes a standalone dashboard to `reports/k6/orders-smoke-report.html` and an aggregated machine-readable summary to `reports/k6/orders-smoke-summary.json`. The files are overwritten by the next run, remain ignored by Git, and match the existing CI artifact collection under `reports/`.
+
 Available Make targets:
 
 - `make performance-public` runs the opt-in public-site response-threshold check.
