@@ -219,7 +219,7 @@ export function renderK6Report(summary) {
   })
   const transferChart = horizontalBarChart({
     id: "transfer-chart",
-    title: "Transferred data",
+    title: "Network traffic",
     description: "Total payload volume received from and sent to the target service.",
     formatter: formatBytes,
     items: [
@@ -265,6 +265,7 @@ export function renderK6Report(summary) {
     .cards { display: flex; flex-wrap: wrap; width: 100%; gap: 14px; margin-bottom: 20px; }
     .card, section { background: #fff; border: 1px solid #dde2ec; border-radius: 12px; box-shadow: 0 4px 16px rgb(20 33 61 / 6%); }
     .card { display: grid; flex: 1 1 220px; min-width: 0; gap: 6px; padding: 18px; }
+    .metric-pair { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); flex: 2 1 454px; min-width: 0; gap: 14px; }
     .card-label, .card-detail { color: #687386; font-size: 0.82rem; }
     .metric-value, .numeric { white-space: nowrap; font-variant-numeric: tabular-nums; }
     .metric-value { font-size: 1.7rem; }
@@ -317,9 +318,11 @@ export function renderK6Report(summary) {
     <div class="cards">
       ${card("Checks passed", formatPercentage(checks.rate), `${finite(checks.passes)} passed, ${finite(checks.fails)} failed`)}
       ${card("HTTP failures", formatPercentage(failures.rate), `${finite(failures.passes)} failed requests`)}
+      <div class="metric-pair" aria-label="Latency percentiles">
+        ${card("90th percentile latency", formatDurationMs(duration["p(90)"]), "90% of requests at or below")}
+        ${card("95th percentile latency", formatDurationMs(duration["p(95)"]), "Target: below 500 ms")}
+      </div>
       ${card("Request rate", formatRate(requests.rate), `${finite(requests.count)} total requests`)}
-      ${card("p90 latency", formatDurationMs(duration["p(90)"]), "90% of requests at or below")}
-      ${card("p95 latency", formatDurationMs(duration["p(95)"]), "Target: below 500 ms")}
       ${card("Iteration rate", formatRate(iterations.rate), `${finite(iterations.count)} completed`)}
       ${card("Test duration", formatDurationMs(summary.state?.testRunDurationMs), "Wall-clock execution")}
     </div>

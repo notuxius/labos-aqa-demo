@@ -47,13 +47,16 @@ test("HTML report has stable percentage and duration labels", () => {
   assert.match(report, /white-space: nowrap/)
 })
 
-test("top metrics include p90 and fill responsive rows", () => {
+test("top percentile metrics stay paired within responsive rows", () => {
   const report = renderK6Report(summary)
 
-  assert.match(report, /<span class="card-label">p90 latency<\/span>/)
+  assert.match(report, /<div class="metric-pair" aria-label="Latency percentiles">/)
+  assert.match(report, /<span class="card-label">90th percentile latency<\/span>/)
+  assert.match(report, /<span class="card-label">95th percentile latency<\/span>/)
   assert.match(report, /<strong class="metric-value">1\u00a0ms<\/strong>/)
   assert.match(report, /\.cards \{ display: flex; flex-wrap: wrap; width: 100%;/)
   assert.match(report, /\.card \{ display: grid; flex: 1 1 220px; min-width: 0;/)
+  assert.match(report, /\.metric-pair \{ display: grid; grid-template-columns: repeat\(2, minmax\(0, 1fr\)\); flex: 2 1 454px;/)
 })
 
 test("HTML report has branded browser metadata", () => {
@@ -73,7 +76,8 @@ test("HTML report includes accessible aggregate charts", () => {
   assert.match(report, /Check outcomes/)
   assert.match(report, /HTTP request outcomes/)
   assert.match(report, /Execution throughput/)
-  assert.match(report, /Transferred data/)
+  assert.match(report, /Network traffic/)
+  assert.doesNotMatch(report, /Transferred data/)
   assert.match(report, /role="img" aria-labelledby=/)
   assert.match(report, /stroke-dasharray="25 75"/)
   assert.doesNotMatch(report, /<script|https?:\/\//)
