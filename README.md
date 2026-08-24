@@ -10,7 +10,7 @@ The private LabOS API is not available, so API behavior is modeled behind determ
 
 - **Backend and REST:** shared HTTPX transport, isolated service clients, resource objects, positive/negative contracts, authentication, timeout, 5xx, and malformed-response coverage.
 - **Integrations and data flows:** stateful create-to-retrieve workflow plus SQL persistence validation.
-- **Python and pytest:** strict typing across source and tests, suite-owned fixtures, fresh data factories, parallel-ready deterministic tests, Ruff, and mypy.
+- **Python and pytest:** strict typing across source and tests, centralized support fixtures, fresh data factories, parallel-ready deterministic tests, Ruff, and mypy.
 - **TypeScript Playwright:** page object, mocked contract, optional live journey, retries, traces, screenshots, videos, HTML, and JUnit reports.
 - **CI/CD and containers:** Jenkins parallel stages, GitHub Actions, separate Docker targets, and Compose.
 - **Performance/resilience:** HTTP transport failure tests, configurable live threshold, and a k6 smoke profile.
@@ -37,19 +37,21 @@ src/labos_demo/
 └── workflows/order_workflow.py  # protocol-driven business flow
 
 tests/
-├── api/                         # complete Python/backend suite
-│   ├── e2e/                     # stateful backend business journey
-│   ├── factories/               # factory behavior contracts
-│   ├── integration/             # SQL fixtures and data-flow coverage
-│   └── public_site/             # public HTTP contract and live smoke
-├── ui/                          # complete TypeScript/Playwright suite
-│   ├── fixtures/                # deterministic HTML contracts
-│   ├── pages/                   # page objects
-│   └── specs/                   # deterministic and live browser tests
-└── support/                     # reusable Python test infrastructure
-    ├── factories/               # generated test-data builders
+├── api/                         # flat private-API contract suite
+├── ui/                          # flat deterministic and live Playwright specs
+└── support/                     # centralized test infrastructure and focused suites
+    ├── e2e/                     # stateful backend business journey
+    ├── factories/               # generated builders and factory contracts
+    ├── fixtures/                # deterministic browser HTML
+    ├── integration/             # SQL fixtures and data-flow coverage
+    ├── pages/                   # Playwright page objects
+    ├── public_site/             # public HTTP support, contract, and live smoke
     └── stubs/                   # stateful service doubles
 ```
+
+`tests/api` and `tests/ui` contain executable top-level tests only. Shared helpers,
+fixtures, page objects, and specialized backend suites have one canonical home under
+`tests/support`; no parallel `fixtures`, `pages`, or `support` trees are maintained per suite.
 
 The deterministic Python suite currently contains eight API contracts, two public-site client contracts, two SQL integration checks, six test-data factory contracts, and one stateful backend E2E flow. Browser coverage stays deliberately small and customer-focused.
 

@@ -3,7 +3,7 @@ import pytest
 
 from labos_demo.public_site import PublicSiteError
 from tests.support.factories.http_values import build_text_body
-from tests.support.public_site import PublicSiteClientFactory
+from tests.support.public_site.client import PublicSiteClientFactory
 
 pytestmark = pytest.mark.contract
 

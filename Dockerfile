@@ -21,6 +21,8 @@ WORKDIR /workspace
 
 COPY package.json package-lock.json playwright.config.ts tsconfig.json ./
 COPY tests/ui ./tests/ui
+COPY tests/support/fixtures ./tests/support/fixtures
+COPY tests/support/pages ./tests/support/pages
 RUN npm ci
 
 CMD ["npm", "run", "test:ui"]

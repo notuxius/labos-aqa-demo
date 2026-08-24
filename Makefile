@@ -21,19 +21,19 @@ api:
 	uv run pytest -q tests/api -m "not live"
 
 public-site:
-	uv run pytest -q tests/api/public_site -m "not live"
+	uv run pytest -q tests/support/public_site -m "not live"
 
 integration:
-	uv run pytest -q tests/api/integration
+	uv run pytest -q tests/support/integration
 
 e2e:
-	uv run pytest -q tests/api/e2e
+	uv run pytest -q tests/support/e2e
 
 # Add future performance suites as prerequisites of this aggregate target.
 performance: performance-k6-preflight performance-public _performance-k6-run
 
 performance-public:
-	uv run pytest -q --live -m "live and performance" tests/api/public_site
+	uv run pytest -q --live -m "live and performance" tests/support/public_site
 
 performance-k6: performance-k6-preflight _performance-k6-run
 

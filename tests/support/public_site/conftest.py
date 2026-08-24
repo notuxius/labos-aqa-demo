@@ -6,7 +6,7 @@ import pytest
 
 from labos_demo.config import Settings
 from labos_demo.public_site import PublicSiteClient
-from tests.support.public_site import PublicSiteClientFactory, PublicSiteHandler
+from tests.support.public_site.client import PublicSiteClientFactory, PublicSiteHandler
 
 
 @pytest.fixture
