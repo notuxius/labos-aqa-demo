@@ -14,3 +14,19 @@ services:
       target: ui-tests
     volumes:
       - ./reports:/workspace/reports
+
+  performance-tests:
+    image: ${K6_IMAGE:-grafana/k6}
+    profiles:
+      - performance
+    environment:
+      LABOS_API_BASE_URL: ${LABOS_API_BASE_URL:-}
+      LABOS_ORDER_ID: ${LABOS_ORDER_ID:-}
+      LABOS_API_TOKEN: ${LABOS_API_TOKEN:-}
+      VUS: ${VUS:-5}
+      DURATION: ${DURATION:-30s}
+    volumes:
+      - ./performance:/scripts:ro
+    command:
+      - run
+      - /scripts/orders-smoke.js

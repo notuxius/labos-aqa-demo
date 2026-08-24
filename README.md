@@ -142,15 +142,18 @@ The k6 script targets the representative endpoint `GET /api/v1/orders/{id}`. Thi
 
 Run only against an approved test environment:
 
-```bash
-export LABOS_API_BASE_URL=https://your-staging-api.example
-export LABOS_ORDER_ID=replace-with-synthetic-order-id
-export LABOS_API_TOKEN=secret
+```dotenv
+# .env (ignored by Git)
+LABOS_API_BASE_URL=https://your-staging-api.example
+LABOS_ORDER_ID=replace-with-synthetic-order-id
+# LABOS_API_TOKEN=secret
+```
 
+```bash
 make performance-k6
 ```
 
-Optional load controls can be supplied as `VUS=10 DURATION=60s make performance-k6`. The profile enforces an error rate below 1% and p95 latency below 500 ms; real thresholds must come from product SLOs and production-like capacity.
+The Make target passes `.env` to a profile-gated Compose service; exported shell values take precedence. Use another file with `K6_ENV_FILE=.env.staging make performance-k6`. Optional load controls can be supplied as `VUS=10 DURATION=60s make performance-k6`. The profile enforces an error rate below 1% and p95 latency below 500 ms; real thresholds must come from product SLOs and production-like capacity.
 
 Available Make targets:
 

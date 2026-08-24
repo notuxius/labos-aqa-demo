@@ -3,6 +3,8 @@
 .PHONY: performance performance-public performance-k6
 
 K6_IMAGE ?= grafana/k6
+K6_ENV_FILE ?= .env
+K6_ENV_OPTION = $(if $(wildcard $(K6_ENV_FILE)),--env-file $(K6_ENV_FILE),)
 
 install:
 	uv sync
@@ -33,16 +35,10 @@ performance-public:
 	uv run pytest -q --live -m "live and performance" tests/api/public_site
 
 performance-k6:
-	@test -n "$$LABOS_API_BASE_URL" || { echo "LABOS_API_BASE_URL is required"; exit 2; }
-	@test -n "$$LABOS_ORDER_ID" || { echo "LABOS_ORDER_ID is required"; exit 2; }
-	docker run --rm -i \
-		--env LABOS_API_BASE_URL \
-		--env LABOS_ORDER_ID \
-		--env LABOS_API_TOKEN \
-		--env VUS \
-		--env DURATION \
-		--volume "$(CURDIR)/performance:/scripts:ro" \
-		$(K6_IMAGE) run /scripts/orders-smoke.js
+	@test -n "$$LABOS_API_BASE_URL" || { test -f "$(K6_ENV_FILE)" && grep -Eq '^LABOS_API_BASE_URL=.+$$' "$(K6_ENV_FILE)"; } || { echo "Set LABOS_API_BASE_URL in the shell or $(K6_ENV_FILE)"; exit 2; }
+	@test -n "$$LABOS_ORDER_ID" || { test -f "$(K6_ENV_FILE)" && grep -Eq '^LABOS_ORDER_ID=.+$$' "$(K6_ENV_FILE)"; } || { echo "Set LABOS_ORDER_ID in the shell or $(K6_ENV_FILE)"; exit 2; }
+	K6_IMAGE=$(K6_IMAGE) docker compose $(K6_ENV_OPTION) \
+		--profile performance run --rm performance-tests
 
 live:
 	uv run pytest -q --live -m live
