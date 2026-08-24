@@ -4,6 +4,7 @@ import httpx
 import pytest
 
 from labos_demo.api import LabOsApiError
+from tests.factories.http_values import build_request_id
 from tests.factories.orders import build_identifier
 from tests.support.api import ApiClientFactory
 
@@ -14,15 +15,22 @@ def test_http_failure_exposes_status_and_operation(
     api_client_factory: ApiClientFactory,
 ) -> None:
     order_id = build_identifier("ORD")
+    request_id = build_request_id()
     client = api_client_factory(
-        lambda _: httpx.Response(503, json={"detail": "unavailable"})
+        lambda _: httpx.Response(
+            503,
+            json={"detail": "unavailable"},
+            headers={"X-Request-ID": request_id},
+        )
     )
 
     with pytest.raises(
         LabOsApiError,
         match=re.escape(f"503 for GET /api/v1/orders/{order_id}"),
-    ):
+    ) as error:
         client.orders.get(order_id)
+
+    assert request_id in str(error.value)
 
 
 def test_transport_timeout_is_normalized_to_client_error(

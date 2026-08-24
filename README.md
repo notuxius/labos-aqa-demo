@@ -49,9 +49,11 @@ ui-tests/
 └── specs/                       # deterministic and live Playwright tests
 ```
 
-The deterministic Python suite currently contains eight API contracts, two public-site client contracts, two SQL integration checks, one test-data factory contract, and one stateful backend E2E flow. Browser coverage stays deliberately small and customer-focused.
+The deterministic Python suite currently contains eight API contracts, two public-site client contracts, two SQL integration checks, two test-data factory contracts, and one stateful backend E2E flow. Browser coverage stays deliberately small and customer-focused.
 
-Order factories generate a new UUID-based order, patient, and specimen identifier plus a timezone-aware current UTC timestamp for every record. Tests derive request paths and expectations from the generated object; explicit overrides remain available for targeted boundary and invalid-data scenarios.
+Factories generate UUID-based order, patient, specimen, and upstream request identifiers; current timezone-aware UTC timestamps; synthetic bearer tokens; and arbitrary response bodies. Tests derive request paths and expectations from generated objects, while explicit overrides remain available for targeted boundary and invalid-data scenarios.
+
+Protocol constants stay deterministic. Endpoint paths, HTTP statuses, expected product text, performance thresholds, and intentionally malformed values describe behavior rather than test records, so randomizing them would reduce clarity and reproducibility.
 
 ## Automated coverage
 

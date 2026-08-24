@@ -2,6 +2,7 @@ import httpx
 import pytest
 
 from labos_demo.api import LabOsApiError
+from tests.factories.http_values import build_api_token
 from tests.factories.orders import build_identifier
 from tests.support.api import ApiClientFactory
 
@@ -11,7 +12,7 @@ pytestmark = [pytest.mark.api, pytest.mark.contract, pytest.mark.security]
 def test_bearer_token_is_sent_but_not_exposed_in_errors(
     api_client_factory: ApiClientFactory,
 ) -> None:
-    api_token = "super-secret-test-token"
+    api_token = build_api_token()
     order_id = build_identifier("ORD")
 
     def handler(request: httpx.Request) -> httpx.Response:
