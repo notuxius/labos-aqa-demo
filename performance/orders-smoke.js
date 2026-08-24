@@ -1,5 +1,11 @@
 import http from 'k6/http';
-import { check } from 'k6';
+import { check, sleep } from 'k6';
+
+const iterationPauseSeconds = Number(__ENV.ITERATION_PAUSE_SECONDS ?? 0.1);
+
+if (!Number.isFinite(iterationPauseSeconds) || iterationPauseSeconds < 0) {
+  throw new Error('ITERATION_PAUSE_SECONDS must be a non-negative number');
+}
 
 export const options = {
   scenarios: {
@@ -33,4 +39,8 @@ export default function () {
   check(response, {
     'status is 200': (result) => result.status === 200,
   });
+
+  if (iterationPauseSeconds > 0) {
+    sleep(iterationPauseSeconds);
+  }
 }

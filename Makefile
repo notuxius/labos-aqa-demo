@@ -6,11 +6,39 @@
 K6_IMAGE ?= grafana/k6
 K6_ENV_FILE ?= .env
 K6_ENV_OPTION = $(if $(wildcard $(K6_ENV_FILE)),--env-file $(K6_ENV_FILE),)
+NPM ?= npm
+NPX ?= npx
+DOCKER ?= docker
+COMPOSE = $(DOCKER) compose
+
+define run_ui
+	@if command -v "$(NPM)" >/dev/null 2>&1; then \
+		$(NPM) run $(1); \
+	elif command -v "$(DOCKER)" >/dev/null 2>&1 && $(COMPOSE) version >/dev/null 2>&1; then \
+		printf '%s\n' "npm is unavailable; running $(1) in the Playwright container."; \
+		$(COMPOSE) run --build --rm ui-tests $(2) npm run $(1); \
+	else \
+		printf '%s\n' \
+			"UI test runtime is unavailable." \
+			"Install Node.js 22+ (npm/npx) or start Docker, then retry."; \
+		exit 127; \
+	fi
+endef
 
 install:
 	uv sync
-	npm ci
-	npx playwright install chromium
+	@if command -v "$(NPM)" >/dev/null 2>&1 && command -v "$(NPX)" >/dev/null 2>&1; then \
+		$(NPM) ci; \
+		$(NPX) playwright install chromium; \
+	elif command -v "$(DOCKER)" >/dev/null 2>&1 && $(COMPOSE) version >/dev/null 2>&1; then \
+		printf '%s\n' "npm/npx are unavailable; building the Playwright container instead."; \
+		$(COMPOSE) build ui-tests; \
+	else \
+		printf '%s\n' \
+			"UI test runtime is unavailable." \
+			"Install Node.js 22+ (npm/npx) or start Docker, then retry."; \
+		exit 127; \
+	fi
 
 test: backend ui
 
@@ -61,20 +89,20 @@ _performance-k6-run:
 
 live:
 	uv run pytest -q --live -m live
-	npm run test:ui:live
+	$(call run_ui,test:ui:live)
 
 ui:
-	npm run test:ui
+	$(call run_ui,test:ui)
 
 ui-live:
-	npm run test:ui:live
+	$(call run_ui,test:ui:live)
 
 ui-headed:
-	npm run test:ui:headed
+	$(call run_ui,test:ui:headed,xvfb-run)
 
 lint:
 	uv run ruff check .
-	npm run typecheck:ui
+	$(call run_ui,typecheck:ui)
 
 typecheck:
 	uv run mypy src tests

@@ -12,6 +12,7 @@ services:
     build:
       context: .
       target: ui-tests
+    init: true
     volumes:
       - ./reports:/workspace/reports
 
@@ -25,6 +26,7 @@ services:
       LABOS_API_TOKEN: ${LABOS_API_TOKEN:-}
       VUS: ${VUS:-5}
       DURATION: ${DURATION:-30s}
+      ITERATION_PAUSE_SECONDS: ${ITERATION_PAUSE_SECONDS:-0.1}
     volumes:
       - ./performance:/scripts:ro
     command:
