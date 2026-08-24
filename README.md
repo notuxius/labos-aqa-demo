@@ -75,7 +75,7 @@ Protocol constants stay deterministic. Endpoint paths, HTTP statuses, expected p
 
 ## Setup
 
-Requirements: Python 3.12+, [uv](https://docs.astral.sh/uv/), and Node.js 24.x. The Python test toolchain uses pytest 9.x.
+Requirements: Python 3.12+, [uv](https://docs.astral.sh/uv/), and Node.js 24.x. The locked quality toolchain uses pytest 9.x, mypy 2.x, TypeScript 7.x, and Playwright 1.62.x.
 
 ```bash
 uv sync

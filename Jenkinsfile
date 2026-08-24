@@ -10,7 +10,7 @@ pipeline {
         stage('Python quality') {
             agent {
                 docker {
-                    image 'ghcr.io/astral-sh/uv:0.9.26-python3.12-bookworm-slim'
+                    image 'ghcr.io/astral-sh/uv:0.12.5-python3.12-trixie-slim'
                     reuseNode true
                 }
             }
@@ -26,7 +26,7 @@ pipeline {
                 stage('Backend and integration') {
                     agent {
                         docker {
-                            image 'ghcr.io/astral-sh/uv:0.9.26-python3.12-bookworm-slim'
+                            image 'ghcr.io/astral-sh/uv:0.12.5-python3.12-trixie-slim'
                             reuseNode true
                         }
                     }
@@ -40,7 +40,7 @@ pipeline {
                 stage('TypeScript UI contract') {
                     agent {
                         docker {
-                            image 'mcr.microsoft.com/playwright:v1.62.0-noble'
+                            image 'mcr.microsoft.com/playwright:v1.62.1-noble'
                             reuseNode true
                         }
                     }
