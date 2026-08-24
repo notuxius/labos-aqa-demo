@@ -40,7 +40,7 @@ tests/
 ├── api/                         # flat private-API contract suite
 ├── ui/                          # flat deterministic and live Playwright specs
 └── support/                     # centralized test infrastructure and focused suites
-    ├── e2e/                     # stateful backend business journey
+    ├── business_flows/          # stateful backend business journeys
     ├── factories/               # generated builders and factory contracts
     ├── fixtures/                # deterministic browser HTML
     ├── integration/             # SQL fixtures and data-flow coverage

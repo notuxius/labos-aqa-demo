@@ -27,7 +27,7 @@ integration:
 	uv run pytest -q tests/support/integration
 
 e2e:
-	uv run pytest -q tests/support/e2e
+	uv run pytest -q tests/support/business_flows
 
 # Add future performance suites as prerequisites of this aggregate target.
 performance: performance-k6-preflight performance-public _performance-k6-run
