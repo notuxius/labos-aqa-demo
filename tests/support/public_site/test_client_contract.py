@@ -30,3 +30,15 @@ def test_homepage_rejects_unavailable_public_site(
 
     with pytest.raises(PublicSiteError, match="Expected status 200"):
         client.get_homepage()
+
+
+def test_homepage_normalizes_transport_failure(
+    public_site_client_factory: PublicSiteClientFactory,
+) -> None:
+    def handler(request: httpx.Request) -> httpx.Response:
+        raise httpx.ConnectError("public site unavailable", request=request)
+
+    client = public_site_client_factory(handler)
+
+    with pytest.raises(PublicSiteError, match="ConnectError"):
+        client.get_homepage()

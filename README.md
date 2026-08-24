@@ -43,19 +43,21 @@ tests/
 └── support/                     # centralized test infrastructure and focused suites
     ├── business_flows/          # stateful backend business journeys
     ├── factories/               # generated builders and factory contracts
-    ├── fixtures/                # deterministic browser HTML
+    ├── fixtures/                # deterministic HTML and Playwright fixtures
     ├── integration/             # SQL fixtures and data-flow coverage
+    ├── locators/                # Playwright locator maps
     ├── pages/                   # Playwright page objects
     ├── public_site/             # public HTTP support, contract, and live smoke
     ├── reporting/               # tested k6 HTML/JSON summary renderer
+    ├── routes/                  # deterministic Playwright route stubs
     └── stubs/                   # stateful service doubles
 ```
 
 `tests/api` and `tests/ui` contain executable top-level tests only. Shared helpers,
-fixtures, page objects, and specialized backend suites have one canonical home under
+fixtures, locator maps, page objects, route helpers, and specialized backend suites have one canonical home under
 `tests/support`; no parallel `fixtures`, `pages`, or `support` trees are maintained per suite.
 
-The deterministic Python suite currently contains eight API contracts, two public-site client contracts, two SQL integration checks, six test-data factory contracts, and one stateful backend E2E flow. Browser coverage stays deliberately small and customer-focused.
+The deterministic Python suite covers API contracts, public-site client behavior, SQL persistence, test-data factories, and a stateful backend E2E flow. Browser coverage stays deliberately small and customer-focused.
 
 Factories generate UUID-based order, patient, specimen, and upstream request identifiers; randomized timezone-aware UTC timestamps; synthetic bearer tokens; and arbitrary response bodies. The datetime factory defaults to the previous 30 days and accepts explicit inclusive `earliest` and `latest` boundaries for past, future, and boundary scenarios. Tests derive request paths and expectations from generated objects, while explicit overrides remain available for targeted boundary and invalid-data scenarios.
 

@@ -7,5 +7,12 @@
     "noEmit": true,
     "types": ["node", "@playwright/test"]
   },
-  "include": ["playwright.config.ts", "tests/ui/**/*.ts", "tests/support/pages/**/*.ts"]
+  "include": [
+    "playwright.config.ts",
+    "tests/ui/**/*.ts",
+    "tests/support/fixtures/**/*.ts",
+    "tests/support/locators/**/*.ts",
+    "tests/support/pages/**/*.ts",
+    "tests/support/routes/**/*.ts"
+  ]
 }

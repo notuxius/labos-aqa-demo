@@ -1,14 +1,12 @@
-import { expect, type Locator, type Page } from '@playwright/test';
+import { expect, type Page } from '@playwright/test';
+
+import { HomePageLocators } from '../locators/home-page.js';
 
 export class HomePage {
-  readonly heroHeading: Locator;
-  readonly demoLink: Locator;
+  private readonly locators: HomePageLocators;
 
   constructor(private readonly page: Page) {
-    this.heroHeading = page.getByRole('heading', {
-      name: /You Deserve a Better Laboratory Information System/i,
-    });
-    this.demoLink = page.getByRole('link', { name: 'Request a Live Demo' }).first();
+    this.locators = new HomePageLocators(page);
   }
 
   async open(): Promise<void> {
@@ -17,7 +15,7 @@ export class HomePage {
 
   async expectLoaded(): Promise<void> {
     await expect(this.page).toHaveTitle(/LabOS/i);
-    await expect(this.heroHeading).toBeVisible();
-    await expect(this.demoLink).toBeVisible();
+    await expect(this.locators.heroHeading).toBeVisible();
+    await expect(this.locators.demoLink).toBeVisible();
   }
 }

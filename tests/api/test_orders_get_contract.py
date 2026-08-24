@@ -43,3 +43,19 @@ def test_get_order_rejects_malformed_response_contract(
 
     with pytest.raises(LabOsContractError, match="LabOrder contract"):
         client.orders.get(order_id)
+
+
+def test_get_order_rejects_invalid_json_response(
+    api_client_factory: ApiClientFactory,
+) -> None:
+    order_id = build_identifier("ORD")
+    client = api_client_factory(
+        lambda _: httpx.Response(
+            200,
+            content=b"{not-json",
+            headers={"Content-Type": "application/json"},
+        )
+    )
+
+    with pytest.raises(LabOsContractError, match="not valid JSON"):
+        client.orders.get(order_id)

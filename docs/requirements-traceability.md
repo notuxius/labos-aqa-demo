@@ -5,7 +5,7 @@
 | Python and pytest | Typed framework under `src/`; API contracts under `tests/api/`; integration and workflow suites under `tests/support/` |
 | REST/backend testing | HTTPX base client, endpoint resources, status/schema/auth/timeout/5xx coverage |
 | Integrations and data flows | Stateful create/retrieve workflow and API-to-SQL persistence checks |
-| TypeScript Playwright | Deterministic/live specs under `tests/ui/`; page objects and HTML fixtures under `tests/support/` |
+| TypeScript Playwright | Deterministic/live specs under `tests/ui/`; locator maps, page objects, route helpers, and HTML fixtures under `tests/support/` |
 | Critical user journeys | Order business workflow plus public product-entry UI journey |
 | Requirements and risk analysis | Risk-based strategy and order test plan in `docs/` |
 | CI/CD | Parallel Python/UI stages, JUnit publishing, and artifact retention in `Jenkinsfile`; GitHub Actions also present |
