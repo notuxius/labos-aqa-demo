@@ -38,6 +38,7 @@ src/labos_demo/
 
 tests/
 ├── api/                         # flat private-API contract suite
+├── performance/                 # k6 backend performance smoke
 ├── ui/                          # flat deterministic and live Playwright specs
 └── support/                     # centralized test infrastructure and focused suites
     ├── business_flows/          # stateful backend business journeys
@@ -145,7 +146,7 @@ The multi-stage [Dockerfile](Dockerfile) keeps Python and browser environments i
 
 ## Performance smoke
 
-The k6 script targets the representative endpoint `GET /api/v1/orders/{id}`. This repository does not provide a deployed order service, and the public `labos.co` website does not expose that endpoint. Replace the example values below with a real, reachable staging API and a synthetic order.
+The k6 [order smoke](tests/performance/orders-smoke.js) targets the representative endpoint `GET /api/v1/orders/{id}`. This repository does not provide a deployed order service, and the public `labos.co` website does not expose that endpoint. Replace the example values below with a real, reachable staging API and a synthetic order.
 
 Run only against an approved test environment:
 

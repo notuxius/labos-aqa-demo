@@ -28,7 +28,7 @@ services:
       DURATION: ${DURATION:-30s}
       ITERATION_PAUSE_SECONDS: ${ITERATION_PAUSE_SECONDS:-0.1}
     volumes:
-      - ./performance:/scripts:ro
+      - ./tests/performance:/scripts:ro
     command:
       - run
       - /scripts/orders-smoke.js

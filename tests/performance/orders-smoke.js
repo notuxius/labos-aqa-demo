@@ -1,3 +1,4 @@
+// Controlled k6 smoke coverage for the representative order-read endpoint.
 import http from 'k6/http';
 import { check, sleep } from 'k6';
 
