@@ -1,5 +1,7 @@
 # LabOS Quality Engineering Portfolio
 
+[![tests](https://github.com/notuxius/labos-aqa-demo/actions/workflows/tests.yml/badge.svg)](https://github.com/notuxius/labos-aqa-demo/actions/workflows/tests.yml)
+
 A backend-focused automation portfolio for a representative laboratory information system. It demonstrates Python/pytest API automation, service workflows, SQL validation, TypeScript Playwright, CI/CD, diagnostics, reporting, Docker, and performance testing.
 
 The private LabOS API is not available, so API behavior is modeled behind deterministic HTTPX transports. Public-site checks are isolated and opt-in. This keeps the project credible: it demonstrates framework design without inventing knowledge of production internals.
@@ -40,6 +42,18 @@ ui-tests/
 ```
 
 The deterministic Python suite currently contains seven API contracts, two SQL integration checks, and one backend E2E flow. Browser coverage stays deliberately small and customer-focused.
+
+## Automated coverage
+
+| Suite | Scope | Default execution |
+|---|---|---|
+| Python quality | Ruff and strict mypy | Push / pull request |
+| API contracts | Request shape, typed responses, malformed payloads, status codes, timeouts, authentication, and secret-safe errors | Push / pull request |
+| SQL integration | Order persistence and missing-record behavior | Push / pull request |
+| Backend E2E | Create order, retrieve it, and preserve patient/specimen associations | Push / pull request |
+| Playwright contract | Mocked customer homepage entry point in Chromium | Push / pull request |
+| Public-site smoke | HTTP availability, response threshold, and live browser journey | Manual workflow only |
+| k6 | Order-read error rate and p95 latency | Approved test environment only |
 
 ## Setup
 
@@ -87,7 +101,13 @@ Or use `make verify`, `make backend`, `make ui`, and `make live`.
 
 [Jenkinsfile](Jenkinsfile) runs Python quality, backend tests, and TypeScript Playwright in isolated Docker agents. Backend and UI tests run in parallel. Jenkins publishes JUnit and archives Playwright HTML, traces, screenshots, and videos from `reports/`.
 
-GitHub Actions provides the same deterministic gates. Live public-site checks remain manual because external availability must not make pull requests flaky.
+[GitHub Actions](https://github.com/notuxius/labos-aqa-demo/actions/workflows/tests.yml) provides the same deterministic gates:
+
+- `python-quality` runs Ruff, mypy, API contracts, SQL integration tests, and backend E2E tests.
+- `typescript-ui` type-checks the Playwright suite and runs the mocked Chromium contract.
+- `live-api-smoke` and `live-ui-smoke` run only through **Actions → tests → Run workflow**.
+
+The workflow uses Node.js 24-compatible GitHub Actions pinned to immutable commit SHAs. JUnit and Playwright reports are uploaded from every deterministic CI run. Live checks remain manual because external availability must not make pull requests flaky.
 
 ## Containers
 
@@ -101,11 +121,13 @@ The multi-stage [Dockerfile](Dockerfile) keeps Python and browser environments i
 
 ## Performance smoke
 
-Run only against an approved test environment and synthetic order:
+The k6 script targets the representative endpoint `GET /api/v1/orders/{id}`. This repository does not provide a deployed order service, and the public `labos.co` website does not expose that endpoint. Replace the example values below with a real, reachable staging API and a synthetic order.
+
+Run only against an approved test environment:
 
 ```bash
 docker run --rm -i \
-  -e LABOS_BASE_URL=https://test.example \
+  -e LABOS_BASE_URL=https://your-staging-api.example \
   -e LABOS_ORDER_ID=ORD-42 \
   -e LABOS_API_TOKEN=secret \
   -v "$PWD/performance:/scripts" \
