@@ -23,6 +23,9 @@ const summary = {
       values: { avg: 0.75, med: 0.8, min: 0.25, max: 1.2, "p(90)": 1, "p(95)": 1.1 },
       thresholds: { "p(95)<500": { ok: true } }
     },
+    http_req_duration_jitter: {
+      values: { avg: 0.2, med: 0.18, min: 0.05, max: 0.4, "p(90)": 0.35, "p(95)": 0.38 }
+    },
     data_received: { values: { count: 2400, rate: 1200 } },
     data_sent: { values: { count: 1200, rate: 600 } }
   }
@@ -80,6 +83,20 @@ test("percentile labels use readable names instead of p90 and p95", () => {
   assert.doesNotMatch(output, /HTTP p95 latency/)
 })
 
+test("report separates latency jitter from richer transfer statistics", () => {
+  const report = renderK6Report(summary)
+
+  assert.match(report, /<h2>Latency variation<\/h2>/)
+  assert.equal(report.match(/class="table-description"/g)?.length, 3)
+  assert.match(report, /Absolute duration change between consecutive requests for each virtual user\./)
+  assert.match(report, /<th scope="row">Average jitter<\/th><td class="numeric">200\u00a0µs<\/td>/)
+  assert.match(report, /<th scope="row">95th percentile jitter<\/th><td class="numeric">380\u00a0µs<\/td>/)
+  assert.match(report, /<th scope="row">Received per request<\/th><td class="numeric">600\u00a0B<\/td>/)
+  assert.match(report, /<th scope="row">Sent per request<\/th><td class="numeric">300\u00a0B<\/td>/)
+  assert.match(report, /<th scope="row">Combined total<\/th><td class="numeric">3\.6\u00a0kB<\/td>/)
+  assert.match(report, /<th scope="row">Combined rate<\/th><td class="numeric">1\.8\u00a0kB\/s<\/td>/)
+})
+
 test("HTML report has branded browser metadata", () => {
   const report = renderK6Report(summary)
 
@@ -117,6 +134,7 @@ test("charts remain finite when optional metrics are absent", () => {
 
   assert.doesNotMatch(report, /NaN|Infinity/)
   assert.match(report, /stroke-dasharray="0 100"/)
+  assert.match(report, /<th scope="row">Average jitter<\/th><td class="numeric">Not available<\/td>/)
 })
 
 test("summary outputs use the requested report directory", () => {
@@ -136,5 +154,6 @@ test("text summary preserves useful terminal diagnostics", () => {
   assert.match(output, /Order API performance smoke: PASSED/)
   assert.match(output, /HTTP failures: 0\.0%/)
   assert.match(output, /HTTP request rate: 3\.2\u00a0req\/s/)
+  assert.match(output, /HTTP average jitter: 200\u00a0µs/)
   assert.match(output, /PASS http_req_duration: p\(95\)<500/)
 })

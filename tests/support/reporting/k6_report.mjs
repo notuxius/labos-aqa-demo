@@ -102,6 +102,16 @@ function latencyRow(label, value) {
   return `<tr><th scope="row">${escapeHtml(label)}</th><td class="numeric">${escapeHtml(formatDurationMs(value))}</td></tr>`
 }
 
+function optionalLatencyRow(label, value) {
+  const formatted = Number.isFinite(value) ? formatDurationMs(value) : "Not available"
+  return `<tr><th scope="row">${escapeHtml(label)}</th><td class="numeric">${escapeHtml(formatted)}</td></tr>`
+}
+
+function perRequest(total, requestCount) {
+  const count = finite(requestCount)
+  return count > 0 ? finite(total) / count : 0
+}
+
 function donutChart({ id, title, description, positiveLabel, negativeLabel, positive, negative }) {
   const positiveCount = finite(positive)
   const negativeCount = finite(negative)
@@ -172,6 +182,7 @@ export function renderK6Report(summary) {
   const requests = metricValues(summary, "http_reqs")
   const iterations = metricValues(summary, "iterations")
   const duration = metricValues(summary, "http_req_duration")
+  const jitter = metricValues(summary, "http_req_duration_jitter")
   const received = metricValues(summary, "data_received")
   const sent = metricValues(summary, "data_sent")
   const thresholds = thresholdResults(summary)
@@ -298,6 +309,7 @@ export function renderK6Report(summary) {
     .bar-label, .bar-number { fill: #344056; font: 13px Inter, ui-sans-serif, system-ui, sans-serif; }
     .bar-number { font-variant-numeric: tabular-nums; }
     .tables { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 20px; }
+    .table-description { min-height: 3.8em; margin: -8px 0 10px; font-size: 0.82rem; line-height: 1.45; }
     section { padding: 20px; overflow-x: auto; }
     table { width: 100%; border-collapse: collapse; }
     th, td { padding: 10px 8px; text-align: left; border-bottom: 1px solid #edf0f5; }
@@ -343,6 +355,7 @@ export function renderK6Report(summary) {
     <div class="tables">
       <section>
         <h2>HTTP request duration</h2>
+        <p class="table-description">Aggregate end-to-end request timing across all HTTP samples.</p>
         <table><tbody>
           ${latencyRow("Average", duration.avg)}
           ${latencyRow("Median", duration.med)}
@@ -354,12 +367,28 @@ export function renderK6Report(summary) {
       </section>
 
       <section>
-        <h2>Data transfer</h2>
+        <h2>Latency variation</h2>
+        <p class="table-description">Absolute duration change between consecutive requests for each virtual user.</p>
         <table><tbody>
-          <tr><th scope="row">Received</th><td class="numeric">${escapeHtml(formatBytes(received.count))}</td></tr>
+          ${optionalLatencyRow("Average jitter", jitter.avg)}
+          ${optionalLatencyRow("Median jitter", jitter.med)}
+          ${optionalLatencyRow("95th percentile jitter", jitter["p(95)"])}
+          ${optionalLatencyRow("Maximum jitter", jitter.max)}
+        </tbody></table>
+      </section>
+
+      <section>
+        <h2>Data transfer</h2>
+        <p class="table-description">Totals, rates, and average bytes per completed HTTP request.</p>
+        <table><tbody>
+          <tr><th scope="row">Total received</th><td class="numeric">${escapeHtml(formatBytes(received.count))}</td></tr>
+          <tr><th scope="row">Received per request</th><td class="numeric">${escapeHtml(formatBytes(perRequest(received.count, requests.count)))}</td></tr>
           <tr><th scope="row">Received rate</th><td class="numeric">${escapeHtml(`${formatBytes(received.rate)}/s`)}</td></tr>
-          <tr><th scope="row">Sent</th><td class="numeric">${escapeHtml(formatBytes(sent.count))}</td></tr>
+          <tr><th scope="row">Total sent</th><td class="numeric">${escapeHtml(formatBytes(sent.count))}</td></tr>
+          <tr><th scope="row">Sent per request</th><td class="numeric">${escapeHtml(formatBytes(perRequest(sent.count, requests.count)))}</td></tr>
           <tr><th scope="row">Sent rate</th><td class="numeric">${escapeHtml(`${formatBytes(sent.rate)}/s`)}</td></tr>
+          <tr><th scope="row">Combined total</th><td class="numeric">${escapeHtml(formatBytes(finite(received.count) + finite(sent.count)))}</td></tr>
+          <tr><th scope="row">Combined rate</th><td class="numeric">${escapeHtml(`${formatBytes(finite(received.rate) + finite(sent.rate))}/s`)}</td></tr>
         </tbody></table>
       </section>
     </div>
@@ -383,6 +412,7 @@ export function renderK6TextSummary(summary) {
   const failures = metricValues(summary, "http_req_failed")
   const requests = metricValues(summary, "http_reqs")
   const duration = metricValues(summary, "http_req_duration")
+  const jitter = metricValues(summary, "http_req_duration_jitter")
   const thresholds = thresholdResults(summary)
   const passed = thresholds.every((threshold) => threshold.passed)
   const thresholdLines = thresholds.map(
@@ -397,6 +427,7 @@ export function renderK6TextSummary(summary) {
     `  HTTP failures: ${formatPercentage(failures.rate)}`,
     `  HTTP request rate: ${formatRate(requests.rate, "req")}`,
     `  HTTP 95th percentile latency: ${formatDurationMs(duration["p(95)"])}`,
+    `  HTTP average jitter: ${Number.isFinite(jitter.avg) ? formatDurationMs(jitter.avg) : "not available"}`,
     "  thresholds:",
     ...(thresholdLines.length ? thresholdLines : ["  none"]),
     ""

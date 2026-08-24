@@ -1,10 +1,13 @@
 // Controlled k6 smoke coverage for the representative order-read endpoint.
 import http from 'k6/http';
 import { check, sleep } from 'k6';
+import { Trend } from 'k6/metrics';
 
 import { createK6SummaryOutputs } from '../support/reporting/k6_report.mjs';
 
 const iterationPauseSeconds = Number(__ENV.ITERATION_PAUSE_SECONDS ?? 0.1);
+const requestDurationJitter = new Trend('http_req_duration_jitter', true);
+let previousRequestDuration;
 
 if (!Number.isFinite(iterationPauseSeconds) || iterationPauseSeconds < 0) {
   throw new Error('ITERATION_PAUSE_SECONDS must be a non-negative number');
@@ -38,6 +41,11 @@ export default function () {
     },
     tags: { endpoint: 'get-order' },
   });
+
+  if (previousRequestDuration !== undefined) {
+    requestDurationJitter.add(Math.abs(response.timings.duration - previousRequestDuration));
+  }
+  previousRequestDuration = response.timings.duration;
 
   check(response, {
     'status is 200': (result) => result.status === 200,
