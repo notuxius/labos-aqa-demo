@@ -10,14 +10,14 @@ pipeline {
         stage('Python quality') {
             agent {
                 docker {
-                    image 'ghcr.io/astral-sh/uv:0.12.5-python3.12-bookworm-slim'
+                    image 'ghcr.io/astral-sh/uv:0.9.26-python3.12-bookworm-slim'
                     reuseNode true
                 }
             }
             steps {
                 sh 'uv sync --frozen'
                 sh 'uv run ruff check .'
-                sh 'uv run mypy src'
+                sh 'uv run mypy src tests'
             }
         }
 
@@ -26,14 +26,14 @@ pipeline {
                 stage('Backend and integration') {
                     agent {
                         docker {
-                            image 'ghcr.io/astral-sh/uv:0.12.5-python3.12-bookworm-slim'
+                            image 'ghcr.io/astral-sh/uv:0.9.26-python3.12-bookworm-slim'
                             reuseNode true
                         }
                     }
                     steps {
                         sh 'uv sync --frozen'
-                        sh '''uv run pytest -q tests/api tests/integration tests/e2e \
-                            -m "not live" --junitxml=reports/python-junit.xml'''
+                        sh '''uv run pytest -q -m "not live" \
+                            --junitxml=reports/python-junit.xml'''
                     }
                 }
 

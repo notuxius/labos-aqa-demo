@@ -1,6 +1,6 @@
 # syntax=docker/dockerfile:1
 
-FROM ghcr.io/astral-sh/uv:0.12.5-python3.12-bookworm-slim AS python-tests
+FROM ghcr.io/astral-sh/uv:0.9.26-python3.12-bookworm-slim AS python-tests
 
 ENV UV_COMPILE_BYTECODE=1 \
     UV_LINK_MODE=copy
@@ -12,7 +12,7 @@ COPY src ./src
 COPY tests ./tests
 RUN uv sync --frozen
 
-CMD ["uv", "run", "pytest", "-q", "tests/api", "tests/integration", "tests/e2e", "-m", "not live"]
+CMD ["uv", "run", "pytest", "-q", "-m", "not live"]
 
 
 FROM mcr.microsoft.com/playwright:v1.62.0-noble AS ui-tests

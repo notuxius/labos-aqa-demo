@@ -1,4 +1,4 @@
-.PHONY: install test backend api integration e2e live ui ui-live ui-headed lint typecheck verify
+.PHONY: install test backend api public-site integration e2e live ui ui-live ui-headed lint typecheck verify
 
 install:
 	uv sync
@@ -8,10 +8,13 @@ install:
 test: backend ui
 
 backend:
-	uv run pytest -q tests/api tests/integration tests/e2e -m "not live"
+	uv run pytest -q -m "not live"
 
 api:
 	uv run pytest -q tests/api -m "not live"
+
+public-site:
+	uv run pytest -q tests/public_site -m "not live"
 
 integration:
 	uv run pytest -q tests/integration
@@ -37,6 +40,6 @@ lint:
 	npm run typecheck:ui
 
 typecheck:
-	uv run mypy src
+	uv run mypy src tests
 
 verify: lint typecheck backend ui

@@ -16,10 +16,10 @@ export const options = {
 };
 
 export default function () {
-  const baseUrl = __ENV.LABOS_BASE_URL;
+  const baseUrl = __ENV.LABOS_API_BASE_URL;
   const orderId = __ENV.LABOS_ORDER_ID;
   if (!baseUrl || !orderId) {
-    throw new Error('LABOS_BASE_URL and LABOS_ORDER_ID are required');
+    throw new Error('LABOS_API_BASE_URL and LABOS_ORDER_ID are required');
   }
 
   const response = http.get(`${baseUrl}/api/v1/orders/${orderId}`, {

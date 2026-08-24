@@ -12,7 +12,8 @@ class Settings(BaseSettings):
         extra="ignore",
     )
 
-    base_url: AnyHttpUrl = AnyHttpUrl("https://labos.co")
+    api_base_url: AnyHttpUrl | None = None
+    public_site_url: AnyHttpUrl = AnyHttpUrl("https://labos.co")
     environment: Literal["local", "staging", "production"] = "staging"
     timeout_seconds: float = Field(default=10.0, gt=0)
     api_token: SecretStr | None = None

@@ -12,7 +12,7 @@ export default defineConfig({
     ['junit', { outputFile: 'reports/playwright/junit.xml' }],
   ],
   use: {
-    baseURL: process.env.LABOS_BASE_URL ?? 'https://labos.co',
+    baseURL: process.env.LABOS_PUBLIC_SITE_URL ?? 'https://labos.co',
     trace: 'on-first-retry',
     screenshot: 'only-on-failure',
     video: 'retain-on-failure',

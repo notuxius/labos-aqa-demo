@@ -1,5 +1,5 @@
 """Typed LabOS domain models."""
 
-from labos_demo.api.models.order import CreateOrderRequest, LabOrder, OrderStatus
+from labos_demo.api.models.order import CreateOrderRequest
 
-__all__ = ["CreateOrderRequest", "LabOrder", "OrderStatus"]
+__all__ = ["CreateOrderRequest"]

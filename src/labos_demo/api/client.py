@@ -7,8 +7,9 @@ from labos_demo.api.errors import (
 from labos_demo.api.errors import (
     LabOsContractError as LabOsContractError,
 )
-from labos_demo.api.models import CreateOrderRequest, LabOrder
+from labos_demo.api.models import CreateOrderRequest
 from labos_demo.api.resources import OrdersResource
+from labos_demo.domain import LabOrder
 
 __all__ = ["LabOsApiClient", "LabOsApiError", "LabOsContractError"]
 
@@ -33,9 +34,6 @@ class LabOsApiClient(BaseApiClient):
             verify_ssl=verify_ssl,
         )
         self.orders = OrdersResource(self)
-
-    def get_public_homepage(self) -> httpx.Response:
-        return self.request("GET", "/", expected_status=200)
 
     def get_order(self, order_id: str) -> LabOrder:
         return self.orders.get(order_id)

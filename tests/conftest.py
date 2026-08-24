@@ -1,8 +1,5 @@
-from collections.abc import Generator
-
 import pytest
 
-from labos_demo.api import LabOsApiClient
 from labos_demo.config import Settings, get_settings
 
 
@@ -34,15 +31,3 @@ def pytest_collection_modifyitems(
 @pytest.fixture(scope="session")
 def settings() -> Settings:
     return get_settings()
-
-
-@pytest.fixture
-def live_api_client(settings: Settings) -> Generator[LabOsApiClient, None, None]:
-    token = settings.api_token.get_secret_value() if settings.api_token else None
-    with LabOsApiClient(
-        str(settings.base_url),
-        timeout_seconds=settings.timeout_seconds,
-        api_token=token,
-        verify_ssl=settings.verify_ssl,
-    ) as client:
-        yield client

@@ -1,6 +1,6 @@
 import sqlite3
 
-from labos_demo.api.models import LabOrder
+from labos_demo.domain import LabOrder
 
 
 class OrderRepository:

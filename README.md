@@ -8,9 +8,9 @@ The private LabOS API is not available, so API behavior is modeled behind determ
 
 ## Vacancy alignment
 
-- **Backend and REST:** typed HTTPX client, resource objects, positive/negative contracts, authentication, timeout, 5xx, and malformed-response coverage.
+- **Backend and REST:** shared HTTPX transport, isolated service clients, resource objects, positive/negative contracts, authentication, timeout, 5xx, and malformed-response coverage.
 - **Integrations and data flows:** stateful create-to-retrieve workflow plus SQL persistence validation.
-- **Python and pytest:** strict typing, markers, fixtures, parallel-ready deterministic tests, Ruff, and mypy.
+- **Python and pytest:** strict typing across source and tests, suite-owned fixtures, fresh data factories, parallel-ready deterministic tests, Ruff, and mypy.
 - **TypeScript Playwright:** page object, mocked contract, optional live journey, retries, traces, screenshots, videos, HTML, and JUnit reports.
 - **CI/CD and containers:** Jenkins parallel stages, GitHub Actions, separate Docker targets, and Compose.
 - **Performance/resilience:** HTTP transport failure tests, configurable live threshold, and a k6 smoke profile.
@@ -22,36 +22,45 @@ See [requirements traceability](docs/requirements-traceability.md) for the full 
 
 ```text
 src/labos_demo/
+├── http/
+│   ├── client.py            # shared HTTP lifecycle and diagnostics
+│   └── errors.py            # transport-level failure
+├── domain/order.py          # service-independent order model
 ├── api/
-│   ├── base_client.py       # HTTP lifecycle, auth, TLS, failures
-│   ├── client.py            # public API facade
+│   ├── base_client.py       # API auth and transport-error mapping
+│   ├── client.py            # private API facade
 │   ├── errors.py
-│   ├── models/order.py      # typed request/response contracts
-│   └── resources/orders.py  # endpoint-specific operations
+│   ├── models/order.py      # typed request contract
+│   └── resources/orders.py  # status semantics and response parsing
+├── public_site/client.py    # isolated public website boundary
 ├── db/order_repository.py       # parameterized SQL validation
-└── workflows/order_workflow.py  # multi-call business flow
+└── workflows/order_workflow.py  # protocol-driven business flow
 
 tests/
-├── api/                         # contracts, resilience, security, live
-├── integration/                 # SQL data-flow coverage
-└── e2e/                         # backend business journey
+├── factories/                   # fresh typed order builders
+├── support/                     # reusable fixture interfaces
+├── api/                         # API contracts, resilience, security
+├── public_site/                 # public contract and opt-in live smoke
+├── integration/                 # SQL fixtures and data-flow coverage
+└── e2e/                         # stateful backend business journey
 
 ui-tests/
 ├── pages/                       # TypeScript page objects
 └── specs/                       # deterministic and live Playwright tests
 ```
 
-The deterministic Python suite currently contains seven API contracts, two SQL integration checks, and one backend E2E flow. Browser coverage stays deliberately small and customer-focused.
+The deterministic Python suite currently contains eight API contracts, two public-site client contracts, two SQL integration checks, and one stateful backend E2E flow. Browser coverage stays deliberately small and customer-focused.
 
 ## Automated coverage
 
 | Suite | Scope | Default execution |
 |---|---|---|
-| Python quality | Ruff and strict mypy | Push / pull request |
+| Python quality | Ruff and strict mypy across source, fixtures, and tests | Push / pull request |
 | API contracts | Request shape, typed responses, malformed payloads, status codes, timeouts, authentication, and secret-safe errors | Push / pull request |
 | SQL integration | Order persistence and missing-record behavior | Push / pull request |
 | Backend E2E | Create order, retrieve it, and preserve patient/specimen associations | Push / pull request |
 | Playwright contract | Mocked customer homepage entry point in Chromium | Push / pull request |
+| Public-site client | Root request and unavailable-site behavior | Push / pull request |
 | Public-site smoke | HTTP availability, response threshold, and live browser journey | Manual workflow only |
 | k6 | Order-read error rate and p95 latency | Approved test environment only |
 
@@ -71,14 +80,16 @@ Optional environment configuration:
 cp .env.example .env
 ```
 
+`LABOS_PUBLIC_SITE_URL` configures public HTTP and browser checks. `LABOS_API_BASE_URL` is deliberately separate and has no default; provide it only for an approved order API environment. Secrets such as `LABOS_API_TOKEN` belong in the CI secret store, not `.env` or source control.
+
 ## Run locally
 
 Python quality and deterministic backend coverage:
 
 ```bash
 uv run ruff check .
-uv run mypy src
-uv run pytest -q tests/api tests/integration tests/e2e -m "not live"
+uv run mypy src tests
+uv run pytest -q -m "not live"
 ```
 
 TypeScript UI contract:
@@ -95,7 +106,7 @@ uv run pytest -q --live -m live
 npm run test:ui:live
 ```
 
-Or use `make verify`, `make backend`, `make ui`, and `make live`.
+Or use `make verify`, `make backend`, `make api`, `make public-site`, `make ui`, and `make live`.
 
 ## CI/CD and reports
 
@@ -103,7 +114,7 @@ Or use `make verify`, `make backend`, `make ui`, and `make live`.
 
 [GitHub Actions](https://github.com/notuxius/labos-aqa-demo/actions/workflows/tests.yml) provides the same deterministic gates:
 
-- `python-quality` runs Ruff, mypy, API contracts, SQL integration tests, and backend E2E tests.
+- `python-quality` runs Ruff, mypy, API and public-site contracts, SQL integration tests, and backend E2E tests.
 - `typescript-ui` type-checks the Playwright suite and runs the mocked Chromium contract.
 - `live-api-smoke` and `live-ui-smoke` run only through **Actions → tests → Run workflow**.
 
@@ -127,7 +138,7 @@ Run only against an approved test environment:
 
 ```bash
 docker run --rm -i \
-  -e LABOS_BASE_URL=https://your-staging-api.example \
+  -e LABOS_API_BASE_URL=https://your-staging-api.example \
   -e LABOS_ORDER_ID=ORD-42 \
   -e LABOS_API_TOKEN=secret \
   -v "$PWD/performance:/scripts" \
