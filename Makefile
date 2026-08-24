@@ -14,13 +14,13 @@ api:
 	uv run pytest -q tests/api -m "not live"
 
 public-site:
-	uv run pytest -q tests/public_site -m "not live"
+	uv run pytest -q tests/api/public_site -m "not live"
 
 integration:
-	uv run pytest -q tests/integration
+	uv run pytest -q tests/api/integration
 
 e2e:
-	uv run pytest -q tests/e2e
+	uv run pytest -q tests/api/e2e
 
 live:
 	uv run pytest -q --live -m live

@@ -4,7 +4,7 @@ from uuid import uuid4
 
 from labos_demo.api.models import CreateOrderRequest
 from labos_demo.domain import LabOrder, OrderStatus
-from tests.factories.datetimes import build_iso_timestamp, build_utc_datetime
+from tests.support.factories.datetimes import build_iso_timestamp, build_utc_datetime
 
 
 class CreateOrderPayload(TypedDict):

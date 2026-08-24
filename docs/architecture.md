@@ -44,4 +44,4 @@ The public website and private API use separate clients and configuration. They 
 
 ## Scaling the framework
 
-Add a new backend domain by creating `domain/<domain>.py`, `api/models/<domain>.py`, `api/resources/<domain>.py`, and focused contract tests. Keep fixture construction in the owning suite's `conftest.py`, reusable builders under `tests/factories/`, cross-service behavior under `workflows/`, and SQL validation under `db/` and `tests/integration/`. This avoids oversized clients and global fixture files while permitting parallel ownership by multiple teams.
+Add a new backend domain by creating `domain/<domain>.py`, `api/models/<domain>.py`, `api/resources/<domain>.py`, and focused tests under `tests/api/`. Keep fixture construction in the owning suite's `conftest.py`, reusable builders and service doubles under `tests/support/`, cross-service behavior under `workflows/`, and SQL validation under `db/` and `tests/api/integration/`. Playwright pages, fixtures, and specs stay together under `tests/ui/`. This avoids oversized clients and global fixture files while permitting parallel ownership by multiple teams.

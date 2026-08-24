@@ -2,7 +2,7 @@ from datetime import UTC, datetime, timedelta
 
 import pytest
 
-from tests.factories.datetimes import build_iso_timestamp, build_utc_datetime
+from tests.support.factories.datetimes import build_iso_timestamp, build_utc_datetime
 
 
 def test_datetime_factory_generates_value_inside_utc_range() -> None:

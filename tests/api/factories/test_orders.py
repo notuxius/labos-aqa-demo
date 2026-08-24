@@ -1,6 +1,6 @@
 from datetime import UTC, datetime
 
-from tests.factories.orders import build_order_payload
+from tests.support.factories.orders import build_order_payload
 
 
 def test_order_factory_generates_unique_records_with_utc_timestamp() -> None:

@@ -5,7 +5,7 @@ import pytest
 
 from labos_demo.api import LabOsApiClient
 from labos_demo.workflows import OrderWorkflow
-from tests.e2e.support.order_api_stub import OrderApiStub
+from tests.support.stubs.order_api_stub import OrderApiStub
 
 
 @pytest.fixture

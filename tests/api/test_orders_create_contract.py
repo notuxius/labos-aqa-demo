@@ -5,11 +5,11 @@ import pytest
 
 from labos_demo.api import LabOsContractError
 from labos_demo.api.models import CreateOrderRequest
-from tests.factories.orders import (
+from tests.support.api import ApiClientFactory
+from tests.support.factories.orders import (
     build_create_order_payload,
     build_order_payload,
 )
-from tests.support.api import ApiClientFactory
 
 pytestmark = [pytest.mark.api, pytest.mark.contract]
 

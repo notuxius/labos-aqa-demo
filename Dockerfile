@@ -20,7 +20,7 @@ FROM mcr.microsoft.com/playwright:v1.62.0-noble AS ui-tests
 WORKDIR /workspace
 
 COPY package.json package-lock.json playwright.config.ts tsconfig.json ./
-COPY ui-tests ./ui-tests
+COPY tests/ui ./tests/ui
 RUN npm ci
 
 CMD ["npm", "run", "test:ui"]

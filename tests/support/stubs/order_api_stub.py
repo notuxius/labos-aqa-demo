@@ -2,7 +2,7 @@ import json
 
 import httpx
 
-from tests.factories.orders import build_order_payload
+from tests.support.factories.orders import build_order_payload
 
 
 class OrderApiStub:

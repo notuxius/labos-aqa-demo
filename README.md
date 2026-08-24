@@ -37,16 +37,18 @@ src/labos_demo/
 └── workflows/order_workflow.py  # protocol-driven business flow
 
 tests/
-├── factories/                   # fresh typed order builders
-├── support/                     # reusable fixture interfaces
-├── api/                         # API contracts, resilience, security
-├── public_site/                 # public contract and opt-in live smoke
-├── integration/                 # SQL fixtures and data-flow coverage
-└── e2e/                         # stateful backend business journey
-
-ui-tests/
-├── pages/                       # TypeScript page objects
-└── specs/                       # deterministic and live Playwright tests
+├── api/                         # complete Python/backend suite
+│   ├── e2e/                     # stateful backend business journey
+│   ├── factories/               # factory behavior contracts
+│   ├── integration/             # SQL fixtures and data-flow coverage
+│   └── public_site/             # public HTTP contract and live smoke
+├── ui/                          # complete TypeScript/Playwright suite
+│   ├── fixtures/                # deterministic HTML contracts
+│   ├── pages/                   # page objects
+│   └── specs/                   # deterministic and live browser tests
+└── support/                     # reusable Python test infrastructure
+    ├── factories/               # generated test-data builders
+    └── stubs/                   # stateful service doubles
 ```
 
 The deterministic Python suite currently contains eight API contracts, two public-site client contracts, two SQL integration checks, six test-data factory contracts, and one stateful backend E2E flow. Browser coverage stays deliberately small and customer-focused.

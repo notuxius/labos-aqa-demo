@@ -2,10 +2,10 @@
 
 | Vacancy capability | Portfolio evidence |
 |---|---|
-| Python and pytest | Typed framework under `src/`; contract, integration, and workflow tests under `tests/` |
+| Python and pytest | Typed framework under `src/`; contract, integration, and workflow tests under `tests/api/` |
 | REST/backend testing | HTTPX base client, endpoint resources, status/schema/auth/timeout/5xx coverage |
 | Integrations and data flows | Stateful create/retrieve workflow and API-to-SQL persistence checks |
-| TypeScript Playwright | Page object and deterministic/live specs under `ui-tests/` |
+| TypeScript Playwright | Page object and deterministic/live specs under `tests/ui/` |
 | Critical user journeys | Order business workflow plus public product-entry UI journey |
 | Requirements and risk analysis | Risk-based strategy and order test plan in `docs/` |
 | CI/CD | Parallel Python/UI stages, JUnit publishing, and artifact retention in `Jenkinsfile`; GitHub Actions also present |

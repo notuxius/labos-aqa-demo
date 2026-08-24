@@ -2,9 +2,9 @@ import httpx
 import pytest
 
 from labos_demo.api import LabOsApiError
-from tests.factories.http_values import build_api_token
-from tests.factories.orders import build_identifier
 from tests.support.api import ApiClientFactory
+from tests.support.factories.http_values import build_api_token
+from tests.support.factories.orders import build_identifier
 
 pytestmark = [pytest.mark.api, pytest.mark.contract, pytest.mark.security]
 

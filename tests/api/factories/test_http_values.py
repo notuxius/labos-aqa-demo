@@ -1,4 +1,4 @@
-from tests.factories.http_values import (
+from tests.support.factories.http_values import (
     build_api_token,
     build_request_id,
     build_text_body,
