@@ -29,7 +29,7 @@ def test_create_order_serializes_validated_request(
     client = api_client_factory(handler)
     order = client.orders.create(CreateOrderRequest(**request_payload))
 
-    assert order.id == "ORD-42"
+    assert order.id == response_payload["id"]
 
 
 def test_create_order_rejects_unexpected_success_status(

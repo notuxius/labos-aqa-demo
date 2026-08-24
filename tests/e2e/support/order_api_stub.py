@@ -2,6 +2,8 @@ import json
 
 import httpx
 
+from tests.factories.orders import build_order_payload
+
 
 class OrderApiStub:
     """Stateful in-memory HTTP double for the representative orders API."""
@@ -25,14 +27,13 @@ class OrderApiStub:
 
     def _create(self, request: httpx.Request) -> httpx.Response:
         submitted = json.loads(request.content)
-        order_id = f"ORD-{len(self.created_orders) + 42}"
-        order: dict[str, object] = {
-            "id": order_id,
-            "patient_id": submitted["patient_id"],
-            "specimen_id": submitted["specimen_id"],
-            "status": "in_progress",
-            "created_at": "2026-08-21T08:00:00Z",
-        }
+        order: dict[str, object] = dict(
+            build_order_payload(
+                patient_id=submitted["patient_id"],
+                specimen_id=submitted["specimen_id"],
+            )
+        )
+        order_id = str(order["id"])
         self.created_orders[order_id] = order
         return httpx.Response(201, json=order)
 

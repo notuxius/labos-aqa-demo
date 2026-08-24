@@ -49,7 +49,9 @@ ui-tests/
 └── specs/                       # deterministic and live Playwright tests
 ```
 
-The deterministic Python suite currently contains eight API contracts, two public-site client contracts, two SQL integration checks, and one stateful backend E2E flow. Browser coverage stays deliberately small and customer-focused.
+The deterministic Python suite currently contains eight API contracts, two public-site client contracts, two SQL integration checks, one test-data factory contract, and one stateful backend E2E flow. Browser coverage stays deliberately small and customer-focused.
+
+Order factories generate a new UUID-based order, patient, and specimen identifier plus a timezone-aware current UTC timestamp for every record. Tests derive request paths and expectations from the generated object; explicit overrides remain available for targeted boundary and invalid-data scenarios.
 
 ## Automated coverage
 
@@ -139,7 +141,7 @@ Run only against an approved test environment:
 ```bash
 docker run --rm -i \
   -e LABOS_API_BASE_URL=https://your-staging-api.example \
-  -e LABOS_ORDER_ID=ORD-42 \
+  -e LABOS_ORDER_ID=replace-with-synthetic-order-id \
   -e LABOS_API_TOKEN=secret \
   -v "$PWD/performance:/scripts" \
   grafana/k6 run /scripts/orders-smoke.js
