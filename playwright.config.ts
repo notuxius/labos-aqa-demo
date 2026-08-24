@@ -10,6 +10,7 @@ for (const envFile of ['.env', '.env.example']) {
 }
 
 const baseURL = process.env.LABOS_BASE_URL;
+const runLiveTests = process.env.RUN_LIVE_TESTS === 'true';
 if (!baseURL) {
   throw new Error('LABOS_BASE_URL is required in the shell, .env, or .env.example');
 }
@@ -20,7 +21,7 @@ export default defineConfig({
   fullyParallel: true,
   forbidOnly: Boolean(process.env.CI),
   retries: process.env.CI ? 2 : 0,
-  workers: process.env.CI ? 2 : undefined,
+  workers: runLiveTests ? 1 : process.env.CI ? 2 : undefined,
   reporter: [
     ['list'],
     ['html', { outputFolder: 'reports/ui/html', open: 'never' }],
