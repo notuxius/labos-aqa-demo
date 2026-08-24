@@ -1,9 +1,10 @@
-from datetime import UTC, datetime
+from datetime import datetime
 from typing import TypedDict
 from uuid import uuid4
 
 from labos_demo.api.models import CreateOrderRequest
 from labos_demo.domain import LabOrder, OrderStatus
+from tests.factories.datetimes import build_iso_timestamp, build_utc_datetime
 
 
 class CreateOrderPayload(TypedDict):
@@ -20,11 +21,6 @@ class OrderPayload(CreateOrderPayload):
 def build_identifier(prefix: str) -> str:
     """Return a collision-resistant synthetic identifier for one test record."""
     return f"{prefix}-{uuid4()}"
-
-
-def build_utc_timestamp() -> datetime:
-    """Return a timezone-aware creation time for one test record."""
-    return datetime.now(UTC)
 
 
 def _identifier_or_generated(value: str | None, prefix: str) -> str:
@@ -63,13 +59,14 @@ def build_order_payload(
     status: str = "in_progress",
     created_at: datetime | None = None,
 ) -> OrderPayload:
-    created_at = created_at or build_utc_timestamp()
     return {
         "id": _identifier_or_generated(order_id, "ORD"),
         "patient_id": _identifier_or_generated(patient_id, "PAT"),
         "specimen_id": _identifier_or_generated(specimen_id, "SPC"),
         "status": status,
-        "created_at": created_at.isoformat(),
+        "created_at": (
+            created_at.isoformat() if created_at is not None else build_iso_timestamp()
+        ),
     }
 
 
@@ -94,5 +91,5 @@ def build_order(
         patient_id=_identifier_or_generated(patient_id, "PAT"),
         specimen_id=_identifier_or_generated(specimen_id, "SPC"),
         status=status,
-        created_at=created_at or build_utc_timestamp(),
+        created_at=created_at or build_utc_datetime(),
     )
