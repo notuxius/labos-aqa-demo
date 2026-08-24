@@ -47,6 +47,28 @@ test("HTML report has stable percentage and duration labels", () => {
   assert.match(report, /white-space: nowrap/)
 })
 
+test("HTML report includes accessible aggregate charts", () => {
+  const report = renderK6Report(summary)
+  const charts = report.match(/<svg class=/g) ?? []
+
+  assert.equal(charts.length, 5)
+  assert.match(report, /Latency distribution/)
+  assert.match(report, /Check outcomes/)
+  assert.match(report, /HTTP request outcomes/)
+  assert.match(report, /Execution throughput/)
+  assert.match(report, /Transferred data/)
+  assert.match(report, /role="img" aria-labelledby=/)
+  assert.match(report, /stroke-dasharray="25 75"/)
+  assert.doesNotMatch(report, /<script|https?:\/\//)
+})
+
+test("charts remain finite when optional metrics are absent", () => {
+  const report = renderK6Report({ state: {}, metrics: {} })
+
+  assert.doesNotMatch(report, /NaN|Infinity/)
+  assert.match(report, /stroke-dasharray="0 100"/)
+})
+
 test("summary outputs use the requested report directory", () => {
   const outputs = createK6SummaryOutputs(summary, "/tmp/k6/")
 

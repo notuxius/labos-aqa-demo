@@ -89,6 +89,66 @@ function latencyRow(label, value) {
   return `<tr><th scope="row">${escapeHtml(label)}</th><td class="numeric">${escapeHtml(formatDurationMs(value))}</td></tr>`
 }
 
+function donutChart({ id, title, description, positiveLabel, negativeLabel, positive, negative }) {
+  const positiveCount = finite(positive)
+  const negativeCount = finite(negative)
+  const total = positiveCount + negativeCount
+  const rate = total > 0 ? positiveCount / total : 0
+  const percentage = Math.min(100, Math.max(0, rate * 100))
+  const remainder = 100 - percentage
+
+  return `
+      <section class="chart-panel">
+        <h2>${escapeHtml(title)}</h2>
+        <p class="chart-description">${escapeHtml(description)}</p>
+        <div class="donut-layout">
+          <svg class="donut-chart" viewBox="0 0 120 120" role="img" aria-labelledby="${id}-title ${id}-description">
+            <title id="${id}-title">${escapeHtml(title)}</title>
+            <desc id="${id}-description">${escapeHtml(`${positiveLabel}: ${positiveCount}; ${negativeLabel}: ${negativeCount}`)}</desc>
+            <circle class="donut-track ${total > 0 ? "negative" : "empty"}" cx="60" cy="60" r="46" pathLength="100"></circle>
+            <circle class="donut-progress" cx="60" cy="60" r="46" pathLength="100" stroke-dasharray="${percentage} ${remainder}"></circle>
+            <text class="donut-value" x="60" y="57" text-anchor="middle">${escapeHtml(formatPercentage(rate))}</text>
+            <text class="donut-label" x="60" y="75" text-anchor="middle">${escapeHtml(positiveLabel)}</text>
+          </svg>
+          <ul class="chart-legend" aria-label="${escapeHtml(title)} legend">
+            <li><span class="legend-swatch positive"></span><span>${escapeHtml(positiveLabel)}</span><strong>${escapeHtml(formatNumber(positiveCount))}</strong></li>
+            <li><span class="legend-swatch negative"></span><span>${escapeHtml(negativeLabel)}</span><strong>${escapeHtml(formatNumber(negativeCount))}</strong></li>
+          </ul>
+        </div>
+      </section>`
+}
+
+function horizontalBarChart({ id, title, description, items, formatter, wide = false }) {
+  const values = items.map((item) => Math.max(0, finite(item.value)))
+  const maximum = Math.max(...values, 0)
+  const rowHeight = 42
+  const chartHeight = 20 + items.length * rowHeight
+  const bars = items
+    .map((item, index) => {
+      const value = values[index]
+      const barWidth = maximum > 0 && value > 0 ? Math.max(3, (value / maximum) * 420) : 0
+      const y = 12 + index * rowHeight
+
+      return `
+            <text class="bar-label" x="0" y="${y + 17}">${escapeHtml(item.label)}</text>
+            <rect class="bar-track" x="130" y="${y}" width="420" height="22" rx="6"></rect>
+            <rect class="bar-value ${item.highlight ? "highlight" : ""}" x="130" y="${y}" width="${barWidth}" height="22" rx="6"></rect>
+            <text class="bar-number" x="750" y="${y + 17}" text-anchor="end">${escapeHtml(formatter(value))}</text>`
+    })
+    .join("")
+
+  return `
+      <section class="chart-panel ${wide ? "chart-wide" : ""}">
+        <h2>${escapeHtml(title)}</h2>
+        <p class="chart-description">${escapeHtml(description)}</p>
+        <svg class="bar-chart" viewBox="0 0 760 ${chartHeight}" role="img" aria-labelledby="${id}-title ${id}-description">
+          <title id="${id}-title">${escapeHtml(title)}</title>
+          <desc id="${id}-description">${escapeHtml(description)}</desc>
+          ${bars}
+        </svg>
+      </section>`
+}
+
 export function renderK6Report(summary) {
   const checks = metricValues(summary, "checks")
   const failures = metricValues(summary, "http_req_failed")
@@ -101,6 +161,59 @@ export function renderK6Report(summary) {
   const passed = thresholds.every((threshold) => threshold.passed)
   const status = passed ? "Passed" : "Failed"
   const generatedAt = new Date().toISOString()
+  const checkOutcomes = donutChart({
+    id: "checks-chart",
+    title: "Check outcomes",
+    description: "Passed and failed functional checks across all iterations.",
+    positiveLabel: "Passed",
+    negativeLabel: "Failed",
+    positive: checks.passes,
+    negative: checks.fails
+  })
+  const requestOutcomes = donutChart({
+    id: "requests-chart",
+    title: "HTTP request outcomes",
+    description: "Successful and failed HTTP requests according to k6 response classification.",
+    positiveLabel: "Successful",
+    negativeLabel: "Failed",
+    positive: failures.fails,
+    negative: failures.passes
+  })
+  const latencyChart = horizontalBarChart({
+    id: "latency-chart",
+    title: "Latency distribution",
+    description: "Relative HTTP request duration across aggregate statistics; exact values appear at right.",
+    wide: true,
+    formatter: formatDurationMs,
+    items: [
+      { label: "Minimum", value: duration.min },
+      { label: "Median", value: duration.med },
+      { label: "Average", value: duration.avg },
+      { label: "p90", value: duration["p(90)"] },
+      { label: "p95", value: duration["p(95)"], highlight: true },
+      { label: "Maximum", value: duration.max }
+    ]
+  })
+  const throughputChart = horizontalBarChart({
+    id: "throughput-chart",
+    title: "Execution throughput",
+    description: "Completed HTTP requests and full test iterations per second.",
+    formatter: formatRate,
+    items: [
+      { label: "Requests", value: requests.rate, highlight: true },
+      { label: "Iterations", value: iterations.rate }
+    ]
+  })
+  const transferChart = horizontalBarChart({
+    id: "transfer-chart",
+    title: "Transferred data",
+    description: "Total payload volume received from and sent to the target service.",
+    formatter: formatBytes,
+    items: [
+      { label: "Received", value: received.count, highlight: true },
+      { label: "Sent", value: sent.count }
+    ]
+  })
 
   const thresholdRows = thresholds.length
     ? thresholds
@@ -140,6 +253,29 @@ export function renderK6Report(summary) {
     .card-label, .card-detail { color: #687386; font-size: 0.82rem; }
     .metric-value, .numeric { white-space: nowrap; font-variant-numeric: tabular-nums; }
     .metric-value { font-size: 1.7rem; }
+    .charts { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px; margin-bottom: 20px; }
+    .chart-wide { grid-column: 1 / -1; }
+    .chart-description { min-height: 2.5em; margin: -8px 0 16px; font-size: 0.86rem; line-height: 1.45; }
+    .donut-layout { display: grid; grid-template-columns: minmax(140px, 190px) 1fr; align-items: center; gap: 20px; }
+    .donut-chart { display: block; width: 100%; height: auto; overflow: visible; }
+    .donut-track, .donut-progress { fill: none; stroke-width: 12; }
+    .donut-track.negative { stroke: #e15162; }
+    .donut-track.empty { stroke: #edf0f5; }
+    .donut-progress { stroke: #16a36a; stroke-linecap: round; transform: rotate(-90deg); transform-origin: 60px 60px; }
+    .donut-value { fill: #172033; font-size: 15px; font-weight: 750; font-variant-numeric: tabular-nums; }
+    .donut-label { fill: #687386; font-size: 7px; }
+    .chart-legend { display: grid; gap: 12px; margin: 0; padding: 0; list-style: none; }
+    .chart-legend li { display: grid; grid-template-columns: 10px 1fr auto; align-items: center; gap: 8px; font-size: 0.86rem; }
+    .chart-legend strong { white-space: nowrap; font-variant-numeric: tabular-nums; }
+    .legend-swatch { width: 10px; height: 10px; border-radius: 3px; }
+    .legend-swatch.positive { background: #16a36a; }
+    .legend-swatch.negative { background: #e15162; }
+    .bar-chart { display: block; width: 100%; min-width: 540px; height: auto; overflow: visible; }
+    .bar-track { fill: #edf0f5; }
+    .bar-value { fill: #a99cfb; }
+    .bar-value.highlight { fill: #6f5ce7; }
+    .bar-label, .bar-number { fill: #344056; font: 13px Inter, ui-sans-serif, system-ui, sans-serif; }
+    .bar-number { font-variant-numeric: tabular-nums; }
     .tables { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 20px; }
     section { padding: 20px; overflow-x: auto; }
     table { width: 100%; border-collapse: collapse; }
@@ -149,7 +285,8 @@ export function renderK6Report(summary) {
     .badge { display: inline-block; padding: 4px 9px; border-radius: 999px; font-size: 0.78rem; font-weight: 700; white-space: nowrap; }
     code { white-space: nowrap; }
     footer { margin-top: 18px; color: #7a8495; font-size: 0.8rem; }
-    @media (max-width: 560px) { body { padding: 20px 12px; } header { display: block; } .status { display: inline-block; margin-top: 8px; } }
+    @media (max-width: 760px) { .charts { grid-template-columns: 1fr; } .chart-wide { grid-column: auto; } }
+    @media (max-width: 560px) { body { padding: 20px 12px; } header { display: block; } .status { display: inline-block; margin-top: 8px; } .donut-layout { grid-template-columns: 130px 1fr; } }
   </style>
 </head>
 <body>
@@ -169,6 +306,14 @@ export function renderK6Report(summary) {
       ${card("p95 latency", formatDurationMs(duration["p(95)"]), "Target: below 500 ms")}
       ${card("Iteration rate", formatRate(iterations.rate), `${finite(iterations.count)} completed`)}
       ${card("Test duration", formatDurationMs(summary.state?.testRunDurationMs), "Wall-clock execution")}
+    </div>
+
+    <div class="charts">
+      ${latencyChart}
+      ${checkOutcomes}
+      ${requestOutcomes}
+      ${throughputChart}
+      ${transferChart}
     </div>
 
     <div class="tables">
