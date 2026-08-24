@@ -47,6 +47,16 @@ test("HTML report has stable percentage and duration labels", () => {
   assert.match(report, /white-space: nowrap/)
 })
 
+test("rates use explicit units and compact charts fit half-width panels", () => {
+  const report = renderK6Report(summary)
+
+  assert.match(report, /3\.2\u00a0req\/s/)
+  assert.match(report, /3\.2\u00a0iter\/s/)
+  assert.doesNotMatch(report, /\u00a0\/s/)
+  assert.equal(report.match(/viewBox="0 0 520 104"/g)?.length, 2)
+  assert.match(report, /\.bar-chart \{ display: block; width: 100%; min-width: 0;/)
+})
+
 test("top percentile metrics stay paired within responsive rows", () => {
   const report = renderK6Report(summary)
 
@@ -125,5 +135,6 @@ test("text summary preserves useful terminal diagnostics", () => {
 
   assert.match(output, /Order API performance smoke: PASSED/)
   assert.match(output, /HTTP failures: 0\.0%/)
+  assert.match(output, /HTTP request rate: 3\.2\u00a0req\/s/)
   assert.match(output, /PASS http_req_duration: p\(95\)<500/)
 })

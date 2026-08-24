@@ -61,8 +61,8 @@ export function formatDurationMs(milliseconds) {
   return `${formatNumber(value / 1000)}\u00a0s`
 }
 
-function formatRate(rate) {
-  return `${formatNumber(rate)}\u00a0/s`
+function formatRate(rate, unit) {
+  return `${formatNumber(rate)}\u00a0${unit}/s`
 }
 
 function formatBytes(bytes) {
@@ -136,17 +136,21 @@ function horizontalBarChart({ id, title, description, items, formatter, wide = f
   const maximum = Math.max(...values, 0)
   const rowHeight = 42
   const chartHeight = 20 + items.length * rowHeight
+  const geometry = wide
+    ? { chartWidth: 760, barX: 180, barWidth: 370, valueX: 750 }
+    : { chartWidth: 520, barX: 105, barWidth: 275, valueX: 510 }
   const bars = items
     .map((item, index) => {
       const value = values[index]
-      const barWidth = maximum > 0 && value > 0 ? Math.max(3, (value / maximum) * 370) : 0
+      const barWidth =
+        maximum > 0 && value > 0 ? Math.max(3, (value / maximum) * geometry.barWidth) : 0
       const y = 12 + index * rowHeight
 
       return `
             <text class="bar-label" x="0" y="${y + 17}">${escapeHtml(item.label)}</text>
-            <rect class="bar-track" x="180" y="${y}" width="370" height="22" rx="6"></rect>
-            <rect class="bar-value ${item.highlight ? "highlight" : ""}" x="180" y="${y}" width="${barWidth}" height="22" rx="6"></rect>
-            <text class="bar-number" x="750" y="${y + 17}" text-anchor="end">${escapeHtml(formatter(value))}</text>`
+            <rect class="bar-track" x="${geometry.barX}" y="${y}" width="${geometry.barWidth}" height="22" rx="6"></rect>
+            <rect class="bar-value ${item.highlight ? "highlight" : ""}" x="${geometry.barX}" y="${y}" width="${barWidth}" height="22" rx="6"></rect>
+            <text class="bar-number" x="${geometry.valueX}" y="${y + 17}" text-anchor="end">${escapeHtml(formatter(value, item))}</text>`
     })
     .join("")
 
@@ -154,7 +158,7 @@ function horizontalBarChart({ id, title, description, items, formatter, wide = f
       <section class="chart-panel ${wide ? "chart-wide" : ""}">
         <h2>${escapeHtml(title)}</h2>
         <p class="chart-description">${escapeHtml(description)}</p>
-        <svg class="bar-chart" viewBox="0 0 760 ${chartHeight}" role="img" aria-labelledby="${id}-title ${id}-description">
+        <svg class="bar-chart" viewBox="0 0 ${geometry.chartWidth} ${chartHeight}" role="img" aria-labelledby="${id}-title ${id}-description">
           <title id="${id}-title">${escapeHtml(title)}</title>
           <desc id="${id}-description">${escapeHtml(description)}</desc>
           ${bars}
@@ -211,10 +215,10 @@ export function renderK6Report(summary) {
     id: "throughput-chart",
     title: "Execution throughput",
     description: "Completed HTTP requests and full test iterations per second.",
-    formatter: formatRate,
+    formatter: (value, item) => formatRate(value, item.unit),
     items: [
-      { label: "Requests", value: requests.rate, highlight: true },
-      { label: "Iterations", value: iterations.rate }
+      { label: "Requests", value: requests.rate, unit: "req", highlight: true },
+      { label: "Iterations", value: iterations.rate, unit: "iter" }
     ]
   })
   const transferChart = horizontalBarChart({
@@ -286,7 +290,8 @@ export function renderK6Report(summary) {
     .legend-swatch { width: 10px; height: 10px; border-radius: 3px; }
     .legend-swatch.positive { background: #16a36a; }
     .legend-swatch.negative { background: #e15162; }
-    .bar-chart { display: block; width: 100%; min-width: 540px; height: auto; overflow: visible; }
+    .bar-chart { display: block; width: 100%; min-width: 0; height: auto; overflow: visible; }
+    .chart-wide .bar-chart { min-width: 700px; }
     .bar-track { fill: #edf0f5; }
     .bar-value { fill: #a99cfb; }
     .bar-value.highlight { fill: #6f5ce7; }
@@ -322,8 +327,8 @@ export function renderK6Report(summary) {
         ${card("90th percentile latency", formatDurationMs(duration["p(90)"]), "90% of requests at or below")}
         ${card("95th percentile latency", formatDurationMs(duration["p(95)"]), "Target: below 500 ms")}
       </div>
-      ${card("Request rate", formatRate(requests.rate), `${finite(requests.count)} total requests`)}
-      ${card("Iteration rate", formatRate(iterations.rate), `${finite(iterations.count)} completed`)}
+      ${card("Request rate", formatRate(requests.rate, "req"), `${finite(requests.count)} total requests`)}
+      ${card("Iteration rate", formatRate(iterations.rate, "iter"), `${finite(iterations.count)} completed`)}
       ${card("Test duration", formatDurationMs(summary.state?.testRunDurationMs), "Wall-clock execution")}
     </div>
 
@@ -390,7 +395,7 @@ export function renderK6TextSummary(summary) {
     `Order API performance smoke: ${passed ? "PASSED" : "FAILED"}`,
     `  checks passed: ${formatPercentage(checks.rate)}`,
     `  HTTP failures: ${formatPercentage(failures.rate)}`,
-    `  HTTP request rate: ${formatRate(requests.rate)}`,
+    `  HTTP request rate: ${formatRate(requests.rate, "req")}`,
     `  HTTP 95th percentile latency: ${formatDurationMs(duration["p(95)"])}`,
     "  thresholds:",
     ...(thresholdLines.length ? thresholdLines : ["  none"]),
