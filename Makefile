@@ -84,7 +84,7 @@ performance-k6-preflight:
 	fi
 
 _performance-k6-run:
-	mkdir -p reports/k6
+	mkdir -p reports/performance
 	K6_IMAGE=$(K6_IMAGE) $(COMPOSE) $(K6_ENV_OPTION) \
 		--profile performance run --rm performance-tests
 

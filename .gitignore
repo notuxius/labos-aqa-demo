@@ -1,5 +1,6 @@
 .venv/
 .env
+.DS_Store
 .pytest_cache/
 .mypy_cache/
 .ruff_cache/
@@ -9,6 +10,14 @@ test-results/
 playwright-report/
 node_modules/
 reports/*
-!reports/.gitkeep
+!reports/api/
+!reports/ui/
+!reports/performance/
+reports/api/*
+reports/ui/*
+reports/performance/*
+!reports/api/.gitkeep
+!reports/ui/.gitkeep
+!reports/performance/.gitkeep
 coverage.xml
 .coverage

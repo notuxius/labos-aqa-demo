@@ -33,7 +33,7 @@ pipeline {
                     steps {
                         sh 'uv sync --frozen'
                         sh '''uv run pytest -q -m "not live" \
-                            --junitxml=reports/python-junit.xml'''
+                            --junitxml=reports/api/junit.xml'''
                     }
                 }
 

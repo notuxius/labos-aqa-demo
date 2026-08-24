@@ -27,9 +27,9 @@ services:
       VUS: ${VUS:-5}
       DURATION: ${DURATION:-30s}
       ITERATION_PAUSE_SECONDS: ${ITERATION_PAUSE_SECONDS:-0.1}
-      K6_SUMMARY_EXPORT: /reports/k6/orders-smoke-summary.json
+      K6_SUMMARY_EXPORT: /reports/performance/orders-smoke-summary.json
       K6_WEB_DASHBOARD: "true"
-      K6_WEB_DASHBOARD_EXPORT: /reports/k6/orders-smoke-report.html
+      K6_WEB_DASHBOARD_EXPORT: /reports/performance/orders-smoke-report.html
       K6_WEB_DASHBOARD_PERIOD: ${K6_WEB_DASHBOARD_PERIOD:-1s}
       K6_WEB_DASHBOARD_PORT: "-1"
     volumes:
