@@ -1,5 +1,8 @@
 const DEFAULT_REPORT_DIRECTORY = "/reports/performance"
 const REPORT_NAME = "orders-smoke"
+const REPORT_TITLE = "LabOS QA · Order API performance report"
+const FAVICON_DATA_URL =
+  "data:image/svg+xml,%3Csvg xmlns='http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%236f5ce7'/%3E%3Cpath d='M17 17h8v22h22v8H17z' fill='white'/%3E%3Ccircle cx='44' cy='20' r='7' fill='%2316a36a'/%3E%3C/svg%3E"
 
 function finite(value, fallback = 0) {
   return Number.isFinite(value) ? value : fallback
@@ -233,7 +236,9 @@ export function renderK6Report(summary) {
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>k6 order smoke report</title>
+  <meta name="application-name" content="LabOS QA">
+  <link rel="icon" type="image/svg+xml" href="${FAVICON_DATA_URL}">
+  <title>${REPORT_TITLE}</title>
   <style>
     :root { color-scheme: light; font-family: Inter, ui-sans-serif, system-ui, sans-serif; color: #172033; background: #f4f6fb; }
     * { box-sizing: border-box; }

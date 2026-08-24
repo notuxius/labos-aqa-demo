@@ -47,6 +47,14 @@ test("HTML report has stable percentage and duration labels", () => {
   assert.match(report, /white-space: nowrap/)
 })
 
+test("HTML report has branded browser metadata", () => {
+  const report = renderK6Report(summary)
+
+  assert.match(report, /<title>LabOS QA · Order API performance report<\/title>/)
+  assert.match(report, /<meta name="application-name" content="LabOS QA">/)
+  assert.match(report, /<link rel="icon" type="image\/svg\+xml" href="data:image\/svg\+xml,/)
+})
+
 test("HTML report includes accessible aggregate charts", () => {
   const report = renderK6Report(summary)
   const charts = report.match(/<svg class=/g) ?? []
