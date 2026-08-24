@@ -23,6 +23,7 @@ COPY package.json package-lock.json playwright.config.ts tsconfig.json ./
 COPY tests/ui ./tests/ui
 COPY tests/support/fixtures ./tests/support/fixtures
 COPY tests/support/pages ./tests/support/pages
+COPY tests/support/reporting ./tests/support/reporting
 RUN npm ci
 
 CMD ["npm", "run", "test:ui"]

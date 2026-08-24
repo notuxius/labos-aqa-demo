@@ -9,6 +9,7 @@
     "test:ui": "playwright test --grep-invert @live",
     "test:ui:live": "RUN_LIVE_TESTS=true playwright test",
     "test:ui:headed": "RUN_LIVE_TESTS=true playwright test --headed",
+    "test:performance-report": "node --test tests/support/reporting/k6_report.test.mjs",
     "typecheck:ui": "tsc --noEmit"
   },
   "devDependencies": {

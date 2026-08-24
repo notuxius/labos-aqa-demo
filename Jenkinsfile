@@ -37,7 +37,7 @@ pipeline {
                     }
                 }
 
-                stage('TypeScript UI contract') {
+                stage('JavaScript and UI contracts') {
                     agent {
                         docker {
                             image 'mcr.microsoft.com/playwright:v1.62.1-noble'
@@ -47,6 +47,7 @@ pipeline {
                     steps {
                         sh 'npm ci'
                         sh 'npm run typecheck:ui'
+                        sh 'npm run test:performance-report'
                         sh 'npm run test:ui'
                     }
                 }

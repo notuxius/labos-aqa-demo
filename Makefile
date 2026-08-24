@@ -1,9 +1,9 @@
 .PHONY: install test backend api public-site integration e2e live
-.PHONY: ui ui-live ui-headed lint typecheck verify
+.PHONY: ui ui-live ui-headed lint typecheck reporting verify
 .PHONY: performance performance-public performance-k6 performance-k6-preflight
 .PHONY: _performance-k6-run
 
-K6_IMAGE ?= grafana/k6
+K6_IMAGE ?= grafana/k6:2.2.0
 K6_ENV_FILE ?= .env
 K6_ENV_OPTION = $(if $(wildcard $(K6_ENV_FILE)),--env-file $(K6_ENV_FILE),)
 NPM ?= npm
@@ -108,4 +108,7 @@ lint:
 typecheck:
 	uv run mypy src tests
 
-verify: lint typecheck backend ui
+reporting:
+	$(call run_ui,test:performance-report)
+
+verify: lint typecheck reporting backend ui

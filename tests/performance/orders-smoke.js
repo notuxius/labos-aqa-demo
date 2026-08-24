@@ -2,6 +2,8 @@
 import http from 'k6/http';
 import { check, sleep } from 'k6';
 
+import { createK6SummaryOutputs } from '../support/reporting/k6_report.mjs';
+
 const iterationPauseSeconds = Number(__ENV.ITERATION_PAUSE_SECONDS ?? 0.1);
 
 if (!Number.isFinite(iterationPauseSeconds) || iterationPauseSeconds < 0) {
@@ -44,4 +46,8 @@ export default function () {
   if (iterationPauseSeconds > 0) {
     sleep(iterationPauseSeconds);
   }
+}
+
+export function handleSummary(data) {
+  return createK6SummaryOutputs(data, __ENV.K6_REPORT_DIRECTORY);
 }

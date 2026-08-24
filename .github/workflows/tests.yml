@@ -56,6 +56,9 @@ jobs:
       - name: Type-check UI suite
         run: npm run typecheck:ui
 
+      - name: Test performance report renderer
+        run: npm run test:performance-report
+
       - name: Run deterministic UI contract
         run: npm run test:ui
 
