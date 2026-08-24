@@ -75,7 +75,7 @@ Protocol constants stay deterministic. Endpoint paths, HTTP statuses, expected p
 
 ## Setup
 
-Requirements: Python 3.12+, [uv](https://docs.astral.sh/uv/), and Node.js 22+.
+Requirements: Python 3.12+, [uv](https://docs.astral.sh/uv/), and Node.js 24.x.
 
 ```bash
 uv sync
