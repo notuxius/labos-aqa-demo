@@ -95,7 +95,7 @@ Optional environment configuration:
 cp .env.example .env
 ```
 
-`LABOS_PUBLIC_SITE_URL` configures public HTTP and browser checks. `LABOS_API_BASE_URL` is deliberately separate and has no default; provide it only for an approved order API environment. Secrets such as `LABOS_API_TOKEN` belong in the CI secret store, not `.env` or source control.
+`LABOS_BASE_URL` is the single source for public HTTP and browser checks; the safe default `https://labos.co` lives in `.env.example`, while shell values and `.env` override it. `LABOS_API_BASE_URL` is deliberately separate and has no default; provide it only for an approved order API environment. Timeouts, SSL verification, environment name, and the public performance threshold use the other documented `LABOS_*` values in `.env.example`. Secrets such as `LABOS_API_TOKEN` belong in the CI secret store, not `.env` or source control.
 
 Repository hygiene is defined explicitly in [`.gitignore`](.gitignore) and [`.dockerignore`](.dockerignore). Git excludes local environments and secrets, Python and Node caches, build and coverage output, Playwright artifacts, generated reports, editor state, logs, and operating-system metadata. Docker excludes the same local state plus version-control, CI, and orchestration files that are not image inputs. Lockfiles, `.env.example`, report-folder placeholders, and the safe shared `.vscode/settings.json` defaults remain versioned.
 

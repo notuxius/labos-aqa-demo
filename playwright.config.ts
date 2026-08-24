@@ -1,4 +1,18 @@
+import { existsSync } from 'node:fs';
+import { loadEnvFile } from 'node:process';
+
 import { defineConfig, devices } from '@playwright/test';
+
+for (const envFile of ['.env', '.env.example']) {
+  if (existsSync(envFile)) {
+    loadEnvFile(envFile);
+  }
+}
+
+const baseURL = process.env.LABOS_BASE_URL;
+if (!baseURL) {
+  throw new Error('LABOS_BASE_URL is required in the shell, .env, or .env.example');
+}
 
 export default defineConfig({
   testDir: './tests/ui',
@@ -13,7 +27,7 @@ export default defineConfig({
     ['junit', { outputFile: 'reports/ui/junit.xml' }],
   ],
   use: {
-    baseURL: process.env.LABOS_PUBLIC_SITE_URL ?? 'https://labos.co',
+    baseURL,
     trace: 'on-first-retry',
     screenshot: 'only-on-failure',
     video: 'retain-on-failure',

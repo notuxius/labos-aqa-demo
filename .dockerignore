@@ -17,6 +17,7 @@ Makefile
 # Local environments and secrets
 .env
 .env.*
+!.env.example
 .secrets
 .direnv
 .venv

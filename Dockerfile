@@ -7,7 +7,7 @@ ENV UV_COMPILE_BYTECODE=1 \
 
 WORKDIR /workspace
 
-COPY pyproject.toml uv.lock README.md ./
+COPY pyproject.toml uv.lock README.md .env.example ./
 COPY src ./src
 COPY tests ./tests
 RUN uv sync --frozen
@@ -19,7 +19,7 @@ FROM mcr.microsoft.com/playwright:v1.62.1-noble AS ui-tests
 
 WORKDIR /workspace
 
-COPY package.json package-lock.json playwright.config.ts tsconfig.json ./
+COPY package.json package-lock.json playwright.config.ts tsconfig.json .env.example ./
 COPY tests/ui ./tests/ui
 COPY tests/support/fixtures ./tests/support/fixtures
 COPY tests/support/pages ./tests/support/pages

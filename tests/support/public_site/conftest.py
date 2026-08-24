@@ -29,7 +29,7 @@ def live_public_site_client(
     settings: Settings,
 ) -> Generator[PublicSiteClient, None, None]:
     with PublicSiteClient(
-        str(settings.public_site_url),
+        str(settings.base_url),
         timeout_seconds=settings.timeout_seconds,
         verify_ssl=settings.verify_ssl,
     ) as client:
