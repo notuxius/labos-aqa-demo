@@ -23,6 +23,10 @@ const summary = {
       values: { avg: 0.75, med: 0.8, min: 0.25, max: 1.2, "p(90)": 1, "p(95)": 1.1 },
       thresholds: { "p(95)<500": { ok: true } }
     },
+    "http_req_duration{endpoint:get-order}": {
+      values: { "p(95)": 1.1 },
+      thresholds: { "p(95)<500": { ok: true } }
+    },
     http_req_duration_jitter: {
       values: { avg: 0.2, med: 0.18, min: 0.05, max: 0.4, "p(90)": 0.35, "p(95)": 0.38 }
     },
@@ -126,6 +130,7 @@ test("threshold metric identifiers are human readable", () => {
 
   assert.match(report, /<th scope="row">HTTP Request Duration<\/th>/)
   assert.match(report, /<th scope="row">HTTP Request Failed<\/th>/)
+  assert.match(report, /<th scope="row">HTTP Request Duration \(endpoint: get-order\)<\/th>/)
   assert.doesNotMatch(report, />http_req_(?:duration|failed)</)
 })
 

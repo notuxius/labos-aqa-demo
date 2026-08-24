@@ -10,8 +10,8 @@ The private LabOS API is not available, so API behavior is modeled behind determ
 
 - **Backend and REST:** shared HTTPX transport, isolated service clients, resource objects, positive/negative contracts, authentication, timeout, 5xx, and malformed-response coverage.
 - **Integrations and data flows:** stateful create-to-retrieve workflow plus SQL persistence validation.
-- **Python and pytest:** strict typing across source and tests, centralized support fixtures, fresh data factories, parallel-ready deterministic tests, Ruff, and mypy.
-- **TypeScript Playwright:** page object, mocked contract, optional live journey, retries, traces, screenshots, videos, HTML, and JUnit reports.
+- **Python and pytest:** strict typing across source and tests, centralized support fixtures, fresh data factories, parallel-ready deterministic tests, Ruff, mypy, and enforced branch coverage.
+- **TypeScript Playwright:** page objects, mocked accessibility and responsive contracts across three browser engines, optional Chromium live journeys, retries, traces, screenshots, videos, HTML, and JUnit reports.
 - **CI/CD and containers:** Jenkins parallel stages, GitHub Actions, separate Docker targets, and Compose.
 - **Performance/resilience:** HTTP transport failure tests, configurable live threshold, and a k6 smoke profile.
 - **Test leadership:** architecture, risk-based strategy, release test plan, Agile workflow, traceability, and failure runbook.
@@ -47,6 +47,7 @@ tests/
     ├── integration/             # SQL fixtures and data-flow coverage
     ├── locators/                # Playwright locator maps
     ├── pages/                   # Playwright page objects
+    ├── performance/             # validated k6 configuration helpers and unit tests
     ├── public_site/             # public HTTP support, contract, and live smoke
     ├── reporting/               # tested k6 HTML/JSON summary renderer
     ├── routes/                  # deterministic Playwright route stubs
@@ -57,7 +58,7 @@ tests/
 fixtures, locator maps, page objects, route helpers, and specialized backend suites have one canonical home under
 `tests/support`; no parallel `fixtures`, `pages`, or `support` trees are maintained per suite.
 
-The deterministic Python suite covers API contracts, public-site client behavior, SQL persistence, test-data factories, and a stateful backend E2E flow. Browser coverage stays deliberately small and customer-focused.
+The deterministic Python suite covers API contracts, public-site client behavior, SQL persistence, test-data factories, and a stateful backend E2E flow with a 90% source-coverage gate. Browser coverage stays customer-focused while exercising Chromium, Firefox, WebKit, and a mobile Chromium viewport. Live browser checks remain Chromium-only to limit external-site load.
 
 Factories generate UUID-based order, patient, specimen, and upstream request identifiers; randomized timezone-aware UTC timestamps; synthetic bearer tokens; and arbitrary response bodies. The datetime factory defaults to the previous 30 days and accepts explicit inclusive `earliest` and `latest` boundaries for past, future, and boundary scenarios. Tests derive request paths and expectations from generated objects, while explicit overrides remain available for targeted boundary and invalid-data scenarios.
 
@@ -67,11 +68,11 @@ Protocol constants stay deterministic. Endpoint paths, HTTP statuses, expected p
 
 | Suite | Scope | Default execution |
 |---|---|---|
-| Python quality | Ruff and strict mypy across source, fixtures, and tests | Push / pull request |
+| Python quality | Ruff, strict mypy, dependency audit, and ≥90% branch coverage across source | Push / pull request |
 | API contracts | Request shape, typed responses, malformed payloads, status codes, timeouts, authentication, and secret-safe errors | Push / pull request |
 | SQL integration | Order persistence and missing-record behavior | Push / pull request |
 | Backend E2E | Create order, retrieve it, and preserve patient/specimen associations | Push / pull request |
-| Playwright contract | Mocked customer homepage entry point in Chromium | Push / pull request |
+| Playwright contract | Mocked customer entry point and automated accessibility scan in Chromium, Firefox, WebKit, and mobile Chromium | Push / pull request |
 | Public-site client | Root request and unavailable-site behavior | Push / pull request |
 | Public-site smoke | HTTP availability, response threshold, and live browser journey | Manual workflow only |
 | k6 | Order-read error rate and 95th percentile latency | Approved test environment only |
@@ -83,7 +84,7 @@ Requirements: Python 3.12+, [uv](https://docs.astral.sh/uv/), and Node.js 24.x. 
 ```bash
 uv sync
 npm ci
-npx playwright install chromium
+npx playwright install chromium firefox webkit
 ```
 
 Docker is a supported alternative for the TypeScript suite. When `npm`/`npx` are not
@@ -125,7 +126,7 @@ uv run pytest -q --live -m live
 npm run test:ui:live
 ```
 
-Or use `make verify`, `make backend`, `make api`, `make public-site`, `make ui`, `make reporting`, `make live`, and the performance targets described below.
+Or use `make verify`, `make backend`, `make api`, `make public-site`, `make ui`, `make reporting`, `make audit`, `make live`, and the performance targets described below. `make audit` runs `pip-audit` and `npm audit`; it is separate from `make verify` because advisory databases require network access.
 
 ## CI/CD and reports
 
@@ -136,6 +137,7 @@ Generated reports are grouped by test layer rather than by test tool:
 ```text
 reports/
 ├── api/
+│   ├── coverage.xml
 │   └── junit.xml
 ├── ui/
 │   ├── artifacts/
@@ -150,8 +152,8 @@ The generated files remain ignored by Git; tracked `.gitkeep` files preserve the
 
 [GitHub Actions](https://github.com/notuxius/labos-aqa-demo/actions/workflows/tests.yml) provides the same deterministic gates:
 
-- `python-quality` runs Ruff, mypy, API and public-site contracts, SQL integration tests, and backend E2E tests.
-- `typescript-ui` type-checks the Playwright suite, unit-tests the k6 report renderer, and runs the mocked Chromium contract.
+- `python-quality` runs Ruff, mypy, dependency auditing, coverage-gated API and public-site contracts, SQL integration tests, and backend E2E tests.
+- `typescript-ui` audits dependencies, type-checks the Playwright suite, unit-tests k6 configuration/reporting, and runs the mocked four-profile UI and accessibility contract.
 - `live-api-smoke` and `live-ui-smoke` run only through **Actions → tests → Run workflow**.
 
 The workflow uses Node.js 24-compatible GitHub Actions pinned to immutable commit SHAs. JUnit and Playwright reports are uploaded from every deterministic CI run. Live checks remain manual because external availability must not make pull requests flaky.
@@ -183,7 +185,7 @@ LABOS_ORDER_ID=replace-with-synthetic-order-id
 make performance-k6
 ```
 
-The Make target passes `.env` to a profile-gated Compose service using the pinned `grafana/k6:2.2.0` image; exported shell values take precedence. Use another file with `K6_ENV_FILE=.env.staging make performance-k6`. Optional load controls can be supplied as `VUS=10 DURATION=60s ITERATION_PAUSE_SECONDS=0.2 make performance-k6`. The default 0.1-second iteration pause prevents this smoke profile from becoming an accidental maximum-throughput test; set it to `0` only when that behavior is intentional. The profile enforces an error rate below 1% and 95th percentile latency below 500 ms; real thresholds must come from product SLOs and production-like capacity.
+The Make target passes `.env` to a profile-gated Compose service using the pinned `grafana/k6:2.2.0` image; exported shell values take precedence. Use another file with `K6_ENV_FILE=.env.staging make performance-k6`. Optional load controls can be supplied as `VUS=10 DURATION=60s ITERATION_PAUSE_SECONDS=0.2 make performance-k6`. The default 0.1-second iteration pause prevents this smoke profile from becoming an accidental maximum-throughput test; set it to `0` only when that behavior is intentional. The profile validates positive VU counts, explicit k6 duration units, non-negative iteration pauses, and an absolute API URL before traffic starts. It checks HTTP 200, JSON content type, and the requested order identifier; any functional-check failure aborts after the initial evaluation window. Tagged order-read traffic must keep errors below 1% and 95th percentile latency below 500 ms. Real thresholds must come from product SLOs and production-like capacity.
 
 Each k6 run uses a repository-owned, unit-tested `handleSummary()` renderer to write a responsive report to `reports/performance/orders-smoke-report.html` and the same aggregated data to `reports/performance/orders-smoke-summary.json`. The self-contained HTML includes a descriptive browser title, an embedded SVG favicon, a full-width responsive summary with paired 90th percentile and 95th percentile latency cards, readable threshold metric names, and accessible inline SVG charts for latency distribution, check and HTTP outcomes, execution throughput, and network traffic. A custom time Trend measures request-to-request jitter per virtual user and reports its average, median, 95th percentile, and maximum separately from transfer data. Transfer details include received, sent, combined, per-request, and per-second values. Compact chart coordinates keep values inside half-width panels, while request and iteration rates use explicit `req/s` and `iter/s` units. Rates are formatted from k6's zero-to-one values, and non-breaking spaces keep values attached to their units. This avoids the built-in dashboard's misleading all-zero percentage auto-scaling and clipped microsecond axis labels. The files are overwritten by the next run, remain ignored by Git, and match the existing CI artifact collection under `reports/`.
 

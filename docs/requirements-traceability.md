@@ -5,14 +5,15 @@
 | Python and pytest | Typed framework under `src/`; API contracts under `tests/api/`; integration and workflow suites under `tests/support/` |
 | REST/backend testing | HTTPX base client, endpoint resources, status/schema/auth/timeout/5xx coverage |
 | Integrations and data flows | Stateful create/retrieve workflow and API-to-SQL persistence checks |
-| TypeScript Playwright | Deterministic/live specs under `tests/ui/`; locator maps, page objects, route helpers, and HTML fixtures under `tests/support/` |
+| TypeScript Playwright | Deterministic cross-engine, mobile, and accessibility specs under `tests/ui/`; locator maps, page objects, route helpers, and HTML fixtures under `tests/support/` |
 | Critical user journeys | Order business workflow plus public product-entry UI journey |
 | Requirements and risk analysis | Risk-based strategy and order test plan in `docs/` |
 | CI/CD | Parallel Python/UI stages, JUnit publishing, and artifact retention in `Jenkinsfile`; GitHub Actions also present |
 | SQL | Parameterized SQLite repository and integration coverage |
 | Debugging/root-cause analysis | Normalized client failures and `docs/failure-runbook.md` |
 | Agile/SDLC collaboration | Refinement, review, defect, demo, and retrospective practices documented |
-| Performance/stability | Configurable live threshold and k6 smoke profile |
+| Performance/stability | Configurable live threshold plus validated, tagged k6 smoke checks and thresholds |
+| Supply-chain quality | Locked dependencies, Python/npm audits, and weekly Dependabot updates |
 | Docker/containers | Separate Python and Playwright Docker targets plus Compose |
 | Reporting | JUnit for Jenkins and Playwright HTML/trace/screenshot/video artifacts |
 | Medical/laboratory domain | Patient/specimen/order models and risk-focused test plan |

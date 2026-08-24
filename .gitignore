@@ -72,7 +72,6 @@ pnpm-debug.log*
 .stylelintcache
 
 # Playwright output
-test-results/
 playwright-report/
 blob-report/
 playwright/.auth/

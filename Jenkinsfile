@@ -18,6 +18,7 @@ pipeline {
                 sh 'uv sync --frozen'
                 sh 'uv run ruff check .'
                 sh 'uv run mypy src tests'
+                sh 'uv run pip-audit'
             }
         }
 
@@ -33,6 +34,8 @@ pipeline {
                     steps {
                         sh 'uv sync --frozen'
                         sh '''uv run pytest -q -m "not live" \
+                            --cov=labos_demo --cov-report=term-missing \
+                            --cov-report=xml:reports/api/coverage.xml \
                             --junitxml=reports/api/junit.xml'''
                     }
                 }
@@ -46,8 +49,9 @@ pipeline {
                     }
                     steps {
                         sh 'npm ci'
+                        sh 'npm audit --audit-level=high'
                         sh 'npm run typecheck:ui'
-                        sh 'npm run test:performance-report'
+                        sh 'npm run test:performance-support'
                         sh 'npm run test:ui'
                     }
                 }

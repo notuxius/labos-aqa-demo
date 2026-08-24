@@ -35,12 +35,23 @@ function metricValues(summary, name) {
 
 function formatMetricName(name) {
   const replacements = { http: "HTTP", req: "Request" }
-
-  return String(name)
+  const [metricName, rawTags] = String(name).split("{", 2)
+  const formattedName = metricName
     .split("_")
     .filter(Boolean)
     .map((word) => replacements[word] ?? `${word.charAt(0).toUpperCase()}${word.slice(1)}`)
     .join(" ")
+
+  if (!rawTags) {
+    return formattedName
+  }
+
+  const tags = rawTags
+    .replace(/}$/, "")
+    .split(",")
+    .map((tag) => tag.replace(/[:=]/, ": "))
+    .join(", ")
+  return `${formattedName} (${tags})`
 }
 
 export function formatPercentage(rate) {

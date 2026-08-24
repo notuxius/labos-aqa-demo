@@ -12,8 +12,10 @@ Protect critical laboratory workflows, especially the association between patien
 | API schema or status regression | Positive, negative, malformed-payload, and unexpected-status tests | Every pull request |
 | Dependency outage or timeout | Transport-failure and 5xx normalization tests | Every pull request |
 | Credential leakage | Authentication/header test and secret-safe errors | Every pull request |
-| Broken customer entry journey | Mocked Playwright contract; live smoke in staging | PR / staging |
+| Broken customer entry journey | Cross-engine/responsive mocked Playwright contract; Chromium live smoke in staging | PR / staging |
+| Accessibility regression | Deterministic axe scan of the customer entry point | Every pull request |
 | Latency or stability regression | k6 threshold profile against a controlled environment | Nightly / pre-release |
+| Vulnerable dependency | Locked dependency audit plus weekly Dependabot updates | Every pull request / weekly |
 | External integration drift | Consumer/provider contracts in PR; sandbox E2E in staging | PR / staging |
 
 ## Test levels
@@ -22,7 +24,7 @@ Protect critical laboratory workflows, especially the association between patien
 - **Integration:** SQL schema and persistence behavior using isolated databases; real database containers are the next environment-specific adapter.
 - **Backend E2E:** stateful multi-call workflows such as create order then retrieve and compare business data.
 - **UI E2E:** only critical user journeys in TypeScript Playwright; API setup should prepare data whenever a real test API exists.
-- **Non-functional:** k6 smoke thresholds first, then load, soak, and resilience experiments with production-like capacity.
+- **Non-functional:** accessibility checks and validated k6 functional/latency thresholds first, then load, soak, and resilience experiments with production-like capacity.
 
 ## Execution model
 

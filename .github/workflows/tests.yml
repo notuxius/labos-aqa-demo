@@ -26,9 +26,14 @@ jobs:
       - name: Mypy
         run: uv run mypy src tests
 
+      - name: Audit Python dependencies
+        run: uv run pip-audit
+
       - name: Backend, integration, and E2E tests
         run: >-
           uv run pytest -q -m "not live" -n auto
+          --cov=labos_demo --cov-report=term-missing
+          --cov-report=xml:reports/api/coverage.xml
           --junitxml=reports/api/junit.xml
 
       - name: Upload Python report
@@ -50,14 +55,17 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Install Chromium
-        run: npx playwright install --with-deps chromium
+      - name: Audit Node.js dependencies
+        run: npm audit --audit-level=high
+
+      - name: Install browsers
+        run: npx playwright install --with-deps chromium firefox webkit
 
       - name: Type-check UI suite
         run: npm run typecheck:ui
 
-      - name: Test performance report renderer
-        run: npm run test:performance-report
+      - name: Test performance support
+        run: npm run test:performance-support
 
       - name: Run deterministic UI contract
         run: npm run test:ui

@@ -40,7 +40,8 @@ The public website and private API use separate clients and configuration. They 
 - API client factories close every generated client, SQL fixtures close connections deterministically, and fresh data builders prevent shared mutable test state.
 - The backend E2E transport is stateful: create persists an order in memory and retrieve must request the generated identifier.
 - Live checks require an explicit flag and never block the deterministic suite by accident.
-- TypeScript Playwright owns browser journeys, locator maps, page objects, deterministic route helpers, traces, screenshots, videos, HTML, and JUnit output.
+- TypeScript Playwright owns cross-engine and mobile browser journeys, accessibility scans, locator maps, page objects, deterministic route helpers, traces, screenshots, videos, HTML, and JUnit output. External live checks stay Chromium-only.
+- Pure JavaScript performance helpers validate k6 configuration before traffic and are unit-tested independently from an approved load environment.
 
 ## Scaling the framework
 

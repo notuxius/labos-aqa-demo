@@ -11,6 +11,25 @@ for (const envFile of ['.env', '.env.example']) {
 
 const baseURL = process.env.LABOS_BASE_URL;
 const runLiveTests = process.env.RUN_LIVE_TESTS === 'true';
+const chromiumProject = {
+  name: 'chromium',
+  use: { ...devices['Desktop Chrome'] },
+};
+const deterministicProjects = [
+  chromiumProject,
+  {
+    name: 'firefox',
+    use: { ...devices['Desktop Firefox'] },
+  },
+  {
+    name: 'webkit',
+    use: { ...devices['Desktop Safari'] },
+  },
+  {
+    name: 'mobile-chrome',
+    use: { ...devices['Pixel 7'] },
+  },
+];
 if (!baseURL) {
   throw new Error('LABOS_BASE_URL is required in the shell, .env, or .env.example');
 }
@@ -33,10 +52,5 @@ export default defineConfig({
     screenshot: 'only-on-failure',
     video: 'retain-on-failure',
   },
-  projects: [
-    {
-      name: 'chromium',
-      use: { ...devices['Desktop Chrome'] },
-    },
-  ],
+  projects: runLiveTests ? [chromiumProject] : deterministicProjects,
 });

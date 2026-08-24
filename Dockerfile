@@ -12,7 +12,7 @@ COPY src ./src
 COPY tests ./tests
 RUN uv sync --frozen
 
-CMD ["uv", "run", "pytest", "-q", "-m", "not live"]
+CMD ["uv", "run", "pytest", "-q", "-m", "not live", "--cov=labos_demo", "--cov-report=term-missing", "--cov-report=xml:reports/api/coverage.xml"]
 
 
 FROM mcr.microsoft.com/playwright:v1.62.1-noble AS ui-tests
@@ -24,6 +24,7 @@ COPY tests/ui ./tests/ui
 COPY tests/support/fixtures ./tests/support/fixtures
 COPY tests/support/locators ./tests/support/locators
 COPY tests/support/pages ./tests/support/pages
+COPY tests/support/performance ./tests/support/performance
 COPY tests/support/reporting ./tests/support/reporting
 COPY tests/support/routes ./tests/support/routes
 RUN npm ci

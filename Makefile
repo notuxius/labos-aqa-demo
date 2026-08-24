@@ -1,5 +1,5 @@
 .PHONY: install test backend api public-site integration e2e live
-.PHONY: ui ui-live ui-headed lint typecheck reporting verify
+.PHONY: ui ui-live ui-headed lint typecheck reporting audit verify
 .PHONY: performance performance-public performance-k6 performance-k6-preflight
 .PHONY: _performance-k6-run
 
@@ -29,7 +29,7 @@ install:
 	uv sync
 	@if command -v "$(NPM)" >/dev/null 2>&1 && command -v "$(NPX)" >/dev/null 2>&1; then \
 		$(NPM) ci; \
-		$(NPX) playwright install chromium; \
+		$(NPX) playwright install chromium firefox webkit; \
 	elif command -v "$(DOCKER)" >/dev/null 2>&1 && $(COMPOSE) version >/dev/null 2>&1; then \
 		printf '%s\n' "npm/npx are unavailable; building the Playwright container instead."; \
 		$(COMPOSE) build ui-tests; \
@@ -43,7 +43,8 @@ install:
 test: backend ui
 
 backend:
-	uv run pytest -q -m "not live"
+	uv run pytest -q -m "not live" --cov=labos_demo \
+		--cov-report=term-missing --cov-report=xml:reports/api/coverage.xml
 
 api:
 	uv run pytest -q tests/api -m "not live"
@@ -109,6 +110,10 @@ typecheck:
 	uv run mypy src tests
 
 reporting:
-	$(call run_ui,test:performance-report)
+	$(call run_ui,test:performance-support)
+
+audit:
+	uv run pip-audit
+	$(call run_ui,audit:node)
 
 verify: lint typecheck reporting backend ui

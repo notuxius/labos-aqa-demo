@@ -4,41 +4,41 @@ import { check, sleep } from 'k6';
 import { Trend } from 'k6/metrics';
 
 import { createK6SummaryOutputs } from '../support/reporting/k6_report.mjs';
+import {
+  buildRequestHeaders,
+  createOrdersSmokeConfig,
+  normalizeBaseUrl,
+} from '../support/performance/k6_config.mjs';
 
-const iterationPauseSeconds = Number(__ENV.ITERATION_PAUSE_SECONDS ?? 0.1);
+const config = createOrdersSmokeConfig(__ENV);
 const requestDurationJitter = new Trend('http_req_duration_jitter', true);
 let previousRequestDuration;
-
-if (!Number.isFinite(iterationPauseSeconds) || iterationPauseSeconds < 0) {
-  throw new Error('ITERATION_PAUSE_SECONDS must be a non-negative number');
-}
 
 export const options = {
   scenarios: {
     orders_smoke: {
       executor: 'constant-vus',
-      vus: Number(__ENV.VUS ?? 5),
-      duration: __ENV.DURATION ?? '30s',
+      vus: config.vus,
+      duration: config.duration,
+      gracefulStop: '5s',
     },
   },
   thresholds: {
-    http_req_failed: ['rate<0.01'],
-    http_req_duration: ['p(95)<500'],
+    checks: [{ threshold: 'rate==1', abortOnFail: true, delayAbortEval: '5s' }],
+    'http_req_failed{endpoint:get-order}': ['rate<0.01'],
+    'http_req_duration{endpoint:get-order}': ['p(95)<500'],
   },
 };
 
 export default function () {
-  const baseUrl = __ENV.LABOS_API_BASE_URL;
+  const baseUrl = normalizeBaseUrl(__ENV.LABOS_API_BASE_URL);
   const orderId = __ENV.LABOS_ORDER_ID;
-  if (!baseUrl || !orderId) {
-    throw new Error('LABOS_API_BASE_URL and LABOS_ORDER_ID are required');
+  if (!orderId) {
+    throw new Error('LABOS_ORDER_ID is required');
   }
 
-  const response = http.get(`${baseUrl}/api/v1/orders/${orderId}`, {
-    headers: {
-      Accept: 'application/json',
-      Authorization: `Bearer ${__ENV.LABOS_API_TOKEN ?? ''}`,
-    },
+  const response = http.get(`${baseUrl}/api/v1/orders/${encodeURIComponent(orderId)}`, {
+    headers: buildRequestHeaders(__ENV.LABOS_API_TOKEN),
     tags: { endpoint: 'get-order' },
   });
 
@@ -47,12 +47,26 @@ export default function () {
   }
   previousRequestDuration = response.timings.duration;
 
+  let responseBody;
+  try {
+    responseBody = response.json();
+  } catch {
+    responseBody = undefined;
+  }
+
   check(response, {
     'status is 200': (result) => result.status === 200,
+    'content type is JSON': (result) =>
+      Object.entries(result.headers).some(
+        ([name, value]) =>
+          name.toLowerCase() === 'content-type' &&
+          String(value).toLowerCase().includes('application/json'),
+      ),
+    'response contains requested order': () => responseBody?.id === orderId,
   });
 
-  if (iterationPauseSeconds > 0) {
-    sleep(iterationPauseSeconds);
+  if (config.iterationPauseSeconds > 0) {
+    sleep(config.iterationPauseSeconds);
   }
 }
 

@@ -6,13 +6,15 @@
     "node": ">=24 <25"
   },
   "scripts": {
+    "audit:node": "npm audit --audit-level=high",
     "test:ui": "playwright test --grep-invert @live",
     "test:ui:live": "RUN_LIVE_TESTS=true playwright test",
     "test:ui:headed": "RUN_LIVE_TESTS=true playwright test --headed",
-    "test:performance-report": "node --test tests/support/reporting/k6_report.test.mjs",
+    "test:performance-support": "node --test tests/support/performance/*.test.mjs tests/support/reporting/*.test.mjs",
     "typecheck:ui": "tsc --noEmit"
   },
   "devDependencies": {
+    "@axe-core/playwright": "4.10.2",
     "@playwright/test": "1.62.1",
     "@types/node": "^24.0.0",
     "typescript": "^7.0.0"
