@@ -1,0 +1,16 @@
+{
+  "name": "labos-aqa-demo-ui",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "test:ui": "playwright test --grep-invert @live",
+    "test:ui:live": "RUN_LIVE_TESTS=true playwright test",
+    "test:ui:headed": "RUN_LIVE_TESTS=true playwright test --headed",
+    "typecheck:ui": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.62.0",
+    "@types/node": "^24.0.0",
+    "typescript": "^5.9.0"
+  }
+}

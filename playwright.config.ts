@@ -1,0 +1,26 @@
+import { defineConfig, devices } from '@playwright/test';
+
+export default defineConfig({
+  testDir: './ui-tests/specs',
+  fullyParallel: true,
+  forbidOnly: Boolean(process.env.CI),
+  retries: process.env.CI ? 2 : 0,
+  workers: process.env.CI ? 2 : undefined,
+  reporter: [
+    ['list'],
+    ['html', { outputFolder: 'reports/playwright/html', open: 'never' }],
+    ['junit', { outputFile: 'reports/playwright/junit.xml' }],
+  ],
+  use: {
+    baseURL: process.env.LABOS_BASE_URL ?? 'https://labos.co',
+    trace: 'on-first-retry',
+    screenshot: 'only-on-failure',
+    video: 'retain-on-failure',
+  },
+  projects: [
+    {
+      name: 'chromium',
+      use: { ...devices['Desktop Chrome'] },
+    },
+  ],
+});

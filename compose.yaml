@@ -1,0 +1,16 @@
+services:
+  backend-tests:
+    build:
+      context: .
+      target: python-tests
+    environment:
+      LABOS_ENVIRONMENT: local
+    volumes:
+      - ./reports:/workspace/reports
+
+  ui-tests:
+    build:
+      context: .
+      target: ui-tests
+    volumes:
+      - ./reports:/workspace/reports
