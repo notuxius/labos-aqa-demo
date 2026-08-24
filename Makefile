@@ -1,6 +1,7 @@
 .PHONY: install test backend api public-site integration e2e live
 .PHONY: ui ui-live ui-headed lint typecheck verify
-.PHONY: performance performance-public performance-k6
+.PHONY: performance performance-public performance-k6 performance-k6-preflight
+.PHONY: _performance-k6-run
 
 K6_IMAGE ?= grafana/k6
 K6_ENV_FILE ?= .env
@@ -29,14 +30,32 @@ e2e:
 	uv run pytest -q tests/api/e2e
 
 # Add future performance suites as prerequisites of this aggregate target.
-performance: performance-public performance-k6
+performance: performance-k6-preflight performance-public _performance-k6-run
 
 performance-public:
 	uv run pytest -q --live -m "live and performance" tests/api/public_site
 
-performance-k6:
-	@test -n "$$LABOS_API_BASE_URL" || { test -f "$(K6_ENV_FILE)" && grep -Eq '^LABOS_API_BASE_URL=.+$$' "$(K6_ENV_FILE)"; } || { echo "Set LABOS_API_BASE_URL in the shell or $(K6_ENV_FILE)"; exit 2; }
-	@test -n "$$LABOS_ORDER_ID" || { test -f "$(K6_ENV_FILE)" && grep -Eq '^LABOS_ORDER_ID=.+$$' "$(K6_ENV_FILE)"; } || { echo "Set LABOS_ORDER_ID in the shell or $(K6_ENV_FILE)"; exit 2; }
+performance-k6: performance-k6-preflight _performance-k6-run
+
+performance-k6-preflight:
+	@missing=""; \
+	has_value() { \
+		test -n "$$(printenv "$$1")" || \
+		{ test -f "$(K6_ENV_FILE)" && grep -Eq "^$$1=.+$$" "$(K6_ENV_FILE)"; }; \
+	}; \
+	has_value LABOS_API_BASE_URL || missing="$$missing LABOS_API_BASE_URL"; \
+	has_value LABOS_ORDER_ID || missing="$$missing LABOS_ORDER_ID"; \
+	if test -n "$$missing"; then \
+		printf '%s\n' \
+			"Performance preflight failed: the k6 order smoke is not configured." \
+			"Missing:$$missing" \
+			"Set the values in the shell or $(K6_ENV_FILE)." \
+			"No k6 load test was started." \
+			"Run only the available public threshold with: make performance-public"; \
+		exit 2; \
+	fi
+
+_performance-k6-run:
 	K6_IMAGE=$(K6_IMAGE) docker compose $(K6_ENV_OPTION) \
 		--profile performance run --rm performance-tests
 

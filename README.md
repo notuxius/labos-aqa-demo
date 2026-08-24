@@ -158,8 +158,8 @@ The Make target passes `.env` to a profile-gated Compose service; exported shell
 Available Make targets:
 
 - `make performance-public` runs the opt-in public-site response-threshold check.
-- `make performance-k6` runs the k6 order smoke and validates its required API URL and order ID.
-- `make performance` runs every registered performance suite.
+- `make performance-k6` validates the required API URL and order ID before starting the k6 order smoke.
+- `make performance` preflights k6 first, then runs every registered performance suite. Missing configuration stops the aggregate before any suite runs, avoiding a partial pass followed by a setup failure.
 
 Performance checks intentionally stay outside `make verify` because they require external approved environments. Add future performance targets as prerequisites of the aggregate `performance` target in the [Makefile](Makefile).
 
