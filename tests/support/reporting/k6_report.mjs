@@ -33,6 +33,16 @@ function metricValues(summary, name) {
   return summary.metrics?.[name]?.values ?? {}
 }
 
+function formatMetricName(name) {
+  const replacements = { http: "HTTP", req: "Request" }
+
+  return String(name)
+    .split("_")
+    .filter(Boolean)
+    .map((word) => replacements[word] ?? `${word.charAt(0).toUpperCase()}${word.slice(1)}`)
+    .join(" ")
+}
+
 export function formatPercentage(rate) {
   return `${formatNumber(finite(rate) * 100, 1, 1)}%`
 }
@@ -223,7 +233,7 @@ export function renderK6Report(summary) {
         .map(
           ({ metricName, expression, passed: thresholdPassed }) => `
           <tr>
-            <th scope="row">${escapeHtml(metricName)}</th>
+            <th scope="row">${escapeHtml(formatMetricName(metricName))}</th>
             <td><code>${escapeHtml(expression)}</code></td>
             <td><span class="badge ${thresholdPassed ? "pass" : "fail"}">${thresholdPassed ? "Passed" : "Failed"}</span></td>
           </tr>`
@@ -252,9 +262,9 @@ export function renderK6Report(summary) {
     .status { flex: 0 0 auto; padding: 8px 14px; border-radius: 999px; font-weight: 700; }
     .status.pass, .badge.pass { color: #096b3e; background: #dff7ea; }
     .status.fail, .badge.fail { color: #a51d2d; background: #fde5e8; }
-    .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 14px; margin-bottom: 20px; }
+    .cards { display: flex; flex-wrap: wrap; width: 100%; gap: 14px; margin-bottom: 20px; }
     .card, section { background: #fff; border: 1px solid #dde2ec; border-radius: 12px; box-shadow: 0 4px 16px rgb(20 33 61 / 6%); }
-    .card { display: grid; gap: 6px; padding: 18px; }
+    .card { display: grid; flex: 1 1 220px; min-width: 0; gap: 6px; padding: 18px; }
     .card-label, .card-detail { color: #687386; font-size: 0.82rem; }
     .metric-value, .numeric { white-space: nowrap; font-variant-numeric: tabular-nums; }
     .metric-value { font-size: 1.7rem; }
@@ -308,6 +318,7 @@ export function renderK6Report(summary) {
       ${card("Checks passed", formatPercentage(checks.rate), `${finite(checks.passes)} passed, ${finite(checks.fails)} failed`)}
       ${card("HTTP failures", formatPercentage(failures.rate), `${finite(failures.passes)} failed requests`)}
       ${card("Request rate", formatRate(requests.rate), `${finite(requests.count)} total requests`)}
+      ${card("p90 latency", formatDurationMs(duration["p(90)"]), "90% of requests at or below")}
       ${card("p95 latency", formatDurationMs(duration["p(95)"]), "Target: below 500 ms")}
       ${card("Iteration rate", formatRate(iterations.rate), `${finite(iterations.count)} completed`)}
       ${card("Test duration", formatDurationMs(summary.state?.testRunDurationMs), "Wall-clock execution")}
