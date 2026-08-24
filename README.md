@@ -79,7 +79,7 @@ Protocol constants stay deterministic. Endpoint paths, HTTP statuses, expected p
 
 ## Setup
 
-Requirements: Python 3.12+, [uv](https://docs.astral.sh/uv/), and Node.js 24.x. The locked quality toolchain uses pytest 9.x, mypy 2.x, TypeScript 7.x, and Playwright 1.62.x.
+Requirements: Python 3.12+, [uv](https://docs.astral.sh/uv/), and Node.js 24 LTS. The Node major is shared by `package.json`, `.nvmrc`, and GitHub Actions; Dependabot may update Node 24 types but cannot move the project to another major automatically. The locked quality toolchain uses pytest 9.x, mypy 2.x, TypeScript 7.x, and Playwright 1.62.x.
 
 ```bash
 uv sync
