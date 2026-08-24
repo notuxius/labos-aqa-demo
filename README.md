@@ -112,7 +112,7 @@ uv run pytest -q --live -m live
 npm run test:ui:live
 ```
 
-Or use `make verify`, `make backend`, `make api`, `make public-site`, `make ui`, and `make live`.
+Or use `make verify`, `make backend`, `make api`, `make public-site`, `make ui`, `make live`, and the performance targets described below.
 
 ## CI/CD and reports
 
@@ -143,15 +143,22 @@ The k6 script targets the representative endpoint `GET /api/v1/orders/{id}`. Thi
 Run only against an approved test environment:
 
 ```bash
-docker run --rm -i \
-  -e LABOS_API_BASE_URL=https://your-staging-api.example \
-  -e LABOS_ORDER_ID=replace-with-synthetic-order-id \
-  -e LABOS_API_TOKEN=secret \
-  -v "$PWD/performance:/scripts" \
-  grafana/k6 run /scripts/orders-smoke.js
+export LABOS_API_BASE_URL=https://your-staging-api.example
+export LABOS_ORDER_ID=replace-with-synthetic-order-id
+export LABOS_API_TOKEN=secret
+
+make performance-k6
 ```
 
-The profile enforces an error rate below 1% and p95 latency below 500 ms; real thresholds must come from product SLOs and production-like capacity.
+Optional load controls can be supplied as `VUS=10 DURATION=60s make performance-k6`. The profile enforces an error rate below 1% and p95 latency below 500 ms; real thresholds must come from product SLOs and production-like capacity.
+
+Available Make targets:
+
+- `make performance-public` runs the opt-in public-site response-threshold check.
+- `make performance-k6` runs the k6 order smoke and validates its required API URL and order ID.
+- `make performance` runs every registered performance suite.
+
+Performance checks intentionally stay outside `make verify` because they require external approved environments. Add future performance targets as prerequisites of the aggregate `performance` target in the [Makefile](Makefile).
 
 ## Engineering documents
 
