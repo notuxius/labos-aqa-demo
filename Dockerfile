@@ -15,7 +15,7 @@ RUN uv sync --frozen
 CMD ["uv", "run", "pytest", "-q", "-m", "not live", "--cov=labos_demo", "--cov-report=term-missing", "--cov-report=xml:reports/api/coverage.xml"]
 
 
-FROM mcr.microsoft.com/playwright:v1.62.1-noble AS ui-tests
+FROM mcr.microsoft.com/playwright:v1.63.0-noble AS ui-tests
 
 WORKDIR /workspace
 
