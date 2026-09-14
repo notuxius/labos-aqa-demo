@@ -1,6 +1,6 @@
 # syntax=docker/dockerfile:1
 
-FROM ghcr.io/astral-sh/uv:0.12.5-python3.12-trixie-slim AS python-tests
+FROM ghcr.io/astral-sh/uv:0.12.13-python3.12-trixie-slim AS python-tests
 
 ENV UV_COMPILE_BYTECODE=1 \
     UV_LINK_MODE=copy
